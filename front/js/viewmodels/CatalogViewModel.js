@@ -1,9 +1,5 @@
-// js/viewmodels/CatalogViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
 
-// ViewModel экрана "Энциклопедия". Хранит режим (список/детали), запрос
-// поиска, выбранное растение, избранное. View только читает state и зовёт
-// эти методы в ответ на клики — сама ничего не решает и не ходит в сеть.
 export class CatalogViewModel extends EventEmitter {
   constructor(plantsService, favoritesService, collectionService, notifier) {
     super();
@@ -13,7 +9,8 @@ export class CatalogViewModel extends EventEmitter {
     this.notifier = notifier;
 
     this.state = {
-      mode: "list",           // "list" | "detail"
+      mode: "list", 
+      viewFilter: "all", 
       loading: true,
       error: null,
       plants: [],
@@ -65,6 +62,16 @@ export class CatalogViewModel extends EventEmitter {
   backToList() {
     this.state = { ...this.state, mode: "list", selectedPlant: null };
     this.emit("change", this.state);
+  }
+
+  setViewFilter(filter) {
+    this.state = { ...this.state, viewFilter: filter };
+    this.emit("change", this.state);
+  }
+
+  getVisiblePlants() {
+    if (this.state.viewFilter !== "favorites") return this.state.plants;
+    return this.state.plants.filter((p) => this.isFavorite(p.id));
   }
 
   isFavorite(plantId) {

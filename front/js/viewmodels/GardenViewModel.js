@@ -9,14 +9,14 @@ export class GardenViewModel extends EventEmitter {
     this.notifier = notifier;
 
     this.state = {
-      viewMode: "grid",
+      viewMode: "grid", 
       loading: true,
       error: null,
       items: [],
       query: "",
       favoriteIds: new Set(),
       editingId: null,
-      editForm: { note: "", waterIntervalDays: "", repotIntervalDays: "", isFavorite: false },
+      editForm: { note: "", waterIntervalDays: "", repotIntervalDays: "" },
       saving: false,
     };
   }
@@ -68,6 +68,24 @@ export class GardenViewModel extends EventEmitter {
     return this.state.favoriteIds.has(plantId);
   }
 
+  async toggleFavorite(plantId) {
+    const isFav = this.isFavorite(plantId);
+    try {
+      if (isFav) {
+        await this.favoritesService.remove(plantId);
+        this.state.favoriteIds.delete(plantId);
+        this.notifier.show("Убрано из избранного");
+      } else {
+        await this.favoritesService.add(plantId);
+        this.state.favoriteIds.add(plantId);
+        this.notifier.show("Добавлено в избранное");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    this.emit("change", this.state);
+  }
+
   getCareStatus(item) {
     return {
       water: this._computeStatus(item.lastWateredAt, item.waterIntervalDays ?? item.plant.waterIntervalDays),
@@ -94,7 +112,6 @@ export class GardenViewModel extends EventEmitter {
         note: item.note || "",
         waterIntervalDays: item.waterIntervalDays ?? "",
         repotIntervalDays: item.repotIntervalDays ?? "",
-        isFavorite: this.isFavorite(item.plant.id),
       },
     };
     this.emit("change", this.state);
@@ -117,7 +134,7 @@ export class GardenViewModel extends EventEmitter {
     this.state = { ...this.state, saving: true };
     this.emit("change", this.state);
 
-    const { note, waterIntervalDays, repotIntervalDays, isFavorite } = this.state.editForm;
+    const { note, waterIntervalDays, repotIntervalDays } = this.state.editForm;
 
     try {
       await this.collectionService.update(item.id, {
@@ -125,13 +142,6 @@ export class GardenViewModel extends EventEmitter {
         waterIntervalDays: waterIntervalDays === "" ? null : Number(waterIntervalDays),
         repotIntervalDays: repotIntervalDays === "" ? null : Number(repotIntervalDays),
       });
-
-      const wasFavorite = this.isFavorite(item.plant.id);
-      if (isFavorite && !wasFavorite) {
-        await this.favoritesService.add(item.plant.id);
-      } else if (!isFavorite && wasFavorite) {
-        await this.favoritesService.remove(item.plant.id);
-      }
 
       this.notifier.show("Изменения сохранены");
       this.state = { ...this.state, editingId: null };
