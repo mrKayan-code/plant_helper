@@ -13,8 +13,9 @@ export class TasksViewModel extends EventEmitter {
       loading: true,
       error: null,
       urgent: [], 
-      tomorrow: [],
+      tomorrow: [], 
       upcoming: [], 
+      completedToday: [], 
       completingKey: null, 
     };
   }
@@ -28,12 +29,15 @@ export class TasksViewModel extends EventEmitter {
       const today = todayISO();
       const tomorrow = addDaysISO(today, 1);
 
+      const completedKeys = new Set(this.state.completedToday.map((c) => c.key));
+      const notCompleted = (r) => !completedKeys.has(`${r.collectionId}:${r.action}`);
+
       this.state = {
         ...this.state,
         loading: false,
-        urgent: reminders.filter((r) => r.dueDate <= today), 
-        tomorrow: reminders.filter((r) => r.dueDate === tomorrow),
-        upcoming: reminders.filter((r) => r.dueDate > today), 
+        urgent: reminders.filter((r) => r.dueDate <= today && notCompleted(r)),
+        tomorrow: reminders.filter((r) => r.dueDate === tomorrow && notCompleted(r)),
+        upcoming: reminders.filter((r) => r.dueDate > today && notCompleted(r)),
       };
     } catch (err) {
       const message = err.message === "Unauthorized"
@@ -62,11 +66,11 @@ export class TasksViewModel extends EventEmitter {
       } else {
         await this.collectionService.markRepotted(reminder.collectionId);
       }
-      this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🪴");
+      this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🌱");
 
       this.state = {
         ...this.state,
-        completedToday: [...this.state.completedToday, { name: reminder.name, action: reminder.action }],
+        completedToday: [...this.state.completedToday, { key, name: reminder.name, action: reminder.action }],
       };
       await this.load();
     } catch (err) {

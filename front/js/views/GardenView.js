@@ -1,4 +1,3 @@
-// js/views/GardenView.js
 import { config } from "../config.js";
 import { daysWord } from "../utils/pluralize.js";
 
@@ -19,7 +18,6 @@ export class GardenView {
       editNote: document.getElementById("editNote"),
       editWaterInterval: document.getElementById("editWaterInterval"),
       editRepotInterval: document.getElementById("editRepotInterval"),
-      editFavorite: document.getElementById("editFavorite"),
       editSaveBtn: document.getElementById("editSaveBtn"),
       editCancelBtn: document.getElementById("editCancelBtn"),
     };
@@ -41,7 +39,6 @@ export class GardenView {
     this.els.editNote.addEventListener("input", () => this.vm.updateEditField("note", this.els.editNote.value));
     this.els.editWaterInterval.addEventListener("input", () => this.vm.updateEditField("waterIntervalDays", this.els.editWaterInterval.value));
     this.els.editRepotInterval.addEventListener("input", () => this.vm.updateEditField("repotIntervalDays", this.els.editRepotInterval.value));
-    this.els.editFavorite.addEventListener("change", () => this.vm.updateEditField("isFavorite", this.els.editFavorite.checked));
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.vm.state.editingId !== null) this.vm.closeEdit();
@@ -104,7 +101,7 @@ export class GardenView {
   }
 
   formatCareBadge(action, status) {
-    const icon = action === "water" ? "💧" : "🪴";
+    const icon = action === "water" ? "💧" : "🌱";
     const label = action === "water" ? "Полить" : "Пересадить";
 
     if (!status.tracked) {
@@ -131,7 +128,7 @@ export class GardenView {
     wrap.className = "garden-actions";
     wrap.innerHTML = `
       <button class="icon-btn" data-action="water" title="Полить">💧</button>
-      <button class="icon-btn" data-action="repot" title="Пересадить">🪴</button>
+      <button class="icon-btn" data-action="repot" title="Пересадить">🌱</button>
       <button class="icon-btn" data-action="edit" title="Редактировать">✏️</button>
       <button class="icon-btn icon-btn--danger" data-action="delete" title="Удалить">🗑️</button>
     `;
@@ -147,10 +144,11 @@ export class GardenView {
   buildGridCard(item) {
     const card = document.createElement("div");
     card.className = "garden-card";
+    const isFav = this.vm.isFavorite(item.plant.id);
     card.innerHTML = `
       <div class="garden-card-img-wrap">
         <img class="garden-card-img" alt="">
-        ${this.vm.isFavorite(item.plant.id) ? '<span class="badge" title="В избранном">★</span>' : ""}
+        <button class="card-favorite-btn" title="В избранное">${isFav ? "★" : "☆"}</button>
       </div>
       <div class="garden-card-body">
         <div class="garden-card-name"></div>
@@ -164,6 +162,7 @@ export class GardenView {
     img.onerror = () => { img.style.display = "none"; };
     card.querySelector(".garden-card-name").textContent = item.plant.name;
     card.querySelector(".garden-card-note").textContent = item.note || "Без заметок";
+    card.querySelector(".card-favorite-btn").addEventListener("click", () => this.vm.toggleFavorite(item.plant.id));
     card.querySelector(".garden-card-body").appendChild(this.buildActions(item));
     return card;
   }
@@ -171,16 +170,17 @@ export class GardenView {
   buildListRow(item) {
     const row = document.createElement("div");
     row.className = "garden-row";
+    const isFav = this.vm.isFavorite(item.plant.id);
     row.innerHTML = `
       <img class="garden-row-img" alt="">
       <div class="garden-row-info">
         <div class="garden-row-top">
           <span class="garden-row-name"></span>
-          ${this.vm.isFavorite(item.plant.id) ? '<span class="garden-row-fav" title="В избранном">★</span>' : ""}
         </div>
         <div class="garden-row-note"></div>
         <div class="garden-badges">${this.buildBadgesHTML(item)}</div>
       </div>
+      <button class="card-favorite-btn card-favorite-btn--inline" title="В избранное">${isFav ? "★" : "☆"}</button>
     `;
     const img = row.querySelector(".garden-row-img");
     img.src = item.plant.imageUrl || "";
@@ -188,6 +188,7 @@ export class GardenView {
     img.onerror = () => { img.style.display = "none"; };
     row.querySelector(".garden-row-name").textContent = item.plant.name;
     row.querySelector(".garden-row-note").textContent = item.note || "Без заметок";
+    row.querySelector(".card-favorite-btn").addEventListener("click", () => this.vm.toggleFavorite(item.plant.id));
     row.appendChild(this.buildActions(item));
     return row;
   }
@@ -204,8 +205,6 @@ export class GardenView {
 
     this.els.editPlantName.textContent = item.plant.name;
 
-    // не перетираем поле, пока пользователь в нём печатает (иначе курсор
-    // будет прыгать на каждое нажатие клавиши из-за повторного рендера)
     if (document.activeElement !== this.els.editNote) {
       this.els.editNote.value = state.editForm.note;
     }
@@ -215,7 +214,6 @@ export class GardenView {
     if (document.activeElement !== this.els.editRepotInterval) {
       this.els.editRepotInterval.value = state.editForm.repotIntervalDays;
     }
-    this.els.editFavorite.checked = state.editForm.isFavorite;
 
     this.els.editSaveBtn.disabled = state.saving;
     this.els.editSaveBtn.textContent = state.saving ? "Сохраняем…" : "Сохранить";
