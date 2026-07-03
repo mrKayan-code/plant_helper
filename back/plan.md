@@ -101,13 +101,15 @@ db.js                — соединение с SQLite + схема + seed (sin
 
 ---
 
-## Шаг 7 — Личный список (`src/routes/collection.js`) — защищён
-- [ ] `GET /api/collection` — JOIN с plants, только `WHERE user_id = req.userId`
-- [ ] `POST /api/collection` — `{ plantId, note?, waterIntervalDays? }`, added_at = сейчас
-- [ ] `PATCH /api/collection/:id` — note / interval / last_watered_at / last_repotted_at
-- [ ] `DELETE /api/collection/:id` — только своё (проверка user_id)
+## Шаг 7 — Личный список (`src/routes/collection.js`) — защищён ✅
+- [x] `GET /api/collection` — JOIN с plants, только `WHERE user_id = req.userId`
+- [x] `POST /api/collection` — `{ plantId, note?, waterIntervalDays?, repotIntervalDays? }`; 400 без plantId, 404 если растения нет
+- [x] `PATCH /api/collection/:id` — note / интервалы / даты (whitelist полей в repo)
+- [x] `DELETE /api/collection/:id` — только своё (проверка user_id)
+- [x] `POST /api/collection/:id/watered` и `/repotted` — дата = `date('now')`
+- [x] `collectionRepo` + `serializeCollectionItem` (вложенный `plant`)
 
-**Проверка:** добавил растение → GET показывает его с данными карточки.
+**Проверка:** ✅ 12 сценариев (CRUD + /watered + /repotted + изоляция юзеров + владение + 401/400/404).
 
 ---
 
@@ -121,10 +123,9 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён
-- [ ] `GET /api/reminders` — по коллекции юзера вычислить `due`:
-      полив: `last_watered_at + water_interval_days <= сегодня`
-      пересадка: (простое правило, напр. раз в год) — по желанию
-- [ ] `POST /api/collection/:id/watered` — выставить `last_watered_at = сегодня`
+- [ ] `GET /api/reminders` — по коллекции юзера вычислить `due` (полив + пересадка):
+      `effective_interval` = из collection, иначе из plants; если интервал/дата пусты — пропускаем
+- [x] ~~`/watered` и `/repotted`~~ — уже сделаны в Шаге 7
 
 **Проверка:** растение с прошедшей датой полива попадает в `/api/reminders`; после `/watered` — исчезает.
 
