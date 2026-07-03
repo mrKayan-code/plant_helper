@@ -1,4 +1,3 @@
-// js/models/CollectionItem.js
 import { Plant } from "./Plant.js";
 
 export class CollectionItem {

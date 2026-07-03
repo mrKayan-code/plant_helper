@@ -1,13 +1,6 @@
-// js/core/Router.js
-// Единственная ответственность: показать нужный экран и спрятать
-// остальные. Ничего не знает о содержимом экранов — просто переключает
-// видимость и вызывает view.onShow(), если он есть у зарегистрированного View.
-// Любая кнопка с data-screen="X" в любом месте приложения ведёт себя
-// одинаково — обработчик здесь один, дублировать в каждом View не нужно.
-
 export class Router {
   constructor() {
-    this._views = new Map(); // screenId -> View (опционально реализует onShow())
+    this._views = new Map();
 
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-screen]");

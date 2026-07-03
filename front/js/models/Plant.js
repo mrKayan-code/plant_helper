@@ -1,7 +1,3 @@
-// js/models/Plant.js
-// Модель растения. Только данные + их разбор из ответа API.
-// Никакой сетевой логики и никакого DOM здесь быть не должно.
-
 export class Plant {
   constructor({ id, name, watering, light, repotting, toxicity, notes,
                 waterIntervalDays, repotIntervalDays, imageUrl }) {
@@ -21,8 +17,6 @@ export class Plant {
     return new Plant(json);
   }
 
-  // Небольшое производное правило показа опасности — по тексту, т.к.
-  // отдельного булева поля "ядовито" в БД нет (см. ../../plan.md).
   get isToxic() {
     if (!this.toxicity) return false;
     const t = this.toxicity.toLowerCase();

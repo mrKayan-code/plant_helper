@@ -1,9 +1,3 @@
-// js/views/AccountView.js
-
-// Кнопка аккаунта (видна на всех экранах) + модалка поверх контента.
-// Не блокирует доступ к приложению — просто открывается/закрывается.
-// Содержимое модалки зависит от viewModel.state.isAuthenticated:
-// форма входа/регистрации — если не вошли, инфо об аккаунте + "Выйти" — если вошли.
 export class AccountView {
   constructor(viewModel) {
     this.vm = viewModel;
@@ -31,7 +25,6 @@ export class AccountView {
     this.els.btn.addEventListener("click", () => this.vm.openModal());
     this.els.closeBtn.addEventListener("click", () => this.vm.closeModal());
 
-    // клик по затемнённому фону (не по самой карточке) тоже закрывает модалку
     this.els.backdrop.addEventListener("click", (e) => {
       if (e.target === this.els.backdrop) this.vm.closeModal();
     });

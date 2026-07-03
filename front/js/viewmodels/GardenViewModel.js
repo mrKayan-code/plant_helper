@@ -1,11 +1,6 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 import { todayISO, addDaysISO, daysBetweenISO } from "../utils/dateUtils.js";
 
-// ViewModel экрана "Мой сад". Доменные данные (сад, избранное) НЕ хранит
-// свою копию — читает из collectionStore / favoritesStore и подписывается
-// на их изменения. Любая мутация (полить, удалить, сохранить, избранное)
-// идёт через стор → он рассылает "change" → все экраны обновляются сами.
-// Это единый источник правды: "протухший стейт" становится невозможен.
 export class GardenViewModel extends EventEmitter {
   constructor(collectionStore, favoritesStore, notifier, careConfirm) {
     super();
@@ -26,7 +21,6 @@ export class GardenViewModel extends EventEmitter {
       saving: false,
     };
 
-    // Подписка на сторы — единственный канал получения доменных данных.
     this.collectionStore.on("change", (items) => {
       this.state = { ...this.state, items, loading: false };
       this.emit("change", this.state);
@@ -42,7 +36,6 @@ export class GardenViewModel extends EventEmitter {
     this.emit("change", this.state);
 
     try {
-      // Сторы перечитают данные и сами разошлют "change" → подписки обновят state.
       await Promise.all([this.collectionStore.load(), this.favoritesStore.load()]);
     } catch (err) {
       const message = err.message === "Unauthorized"
@@ -77,7 +70,7 @@ export class GardenViewModel extends EventEmitter {
   async toggleFavorite(plantId) {
     const isFav = this.isFavorite(plantId);
     try {
-      await this.favoritesStore.toggle(plantId); // стор сам разошлёт "change"
+      await this.favoritesStore.toggle(plantId);
       this.notifier.show(isFav ? "Убрано из избранного" : "Добавлено в избранное");
     } catch (err) {
       console.error(err);
@@ -159,9 +152,6 @@ export class GardenViewModel extends EventEmitter {
     }
   }
 
-  // Полив/пересадка идут через единую форму подтверждения (она сама
-  // вызовет collectionStore после подтверждения). Считаем daysLeft, чтобы
-  // форма показала нужный тон (просрочено / рано / пора).
   markWatered(id) {
     const item = this.state.items.find((i) => i.id === id);
     if (!item) return;

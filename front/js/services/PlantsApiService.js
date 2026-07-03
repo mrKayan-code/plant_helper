@@ -1,8 +1,5 @@
-// js/services/PlantsApiService.js
 import { Plant } from "../models/Plant.js";
 
-// Единственная ответственность: получение справочника растений.
-// Моков не бывает — этот эндпоинт бэк отдаёт с первого коммита (см. plan.md).
 export class PlantsApiService {
   constructor(httpClient) {
     this.http = httpClient;

@@ -215,7 +215,7 @@ button:focus-visible {
   color: var(--color-text-muted);
 }
 .field-input {
-  width: 100%;               /* иначе input/textarea берут свою интринзик-ширину и вылезают */
+  width: 100%;           
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-3);
@@ -849,11 +849,11 @@ button:focus-visible {
   top: 50%;
   transform: translate(-50%, -50%) scale(0.96);
   opacity: 0;
-  pointer-events: none;      /* закрытая модалка не перехватывает клики */
-  width: calc(100% - var(--space-4) * 2); /* поля по бокам на узких экранах */
+  pointer-events: none; 
+  width: calc(100% - var(--space-4) * 2); 
   max-width: 480px;
-  max-height: 90vh;          /* не выше экрана */
-  overflow-y: auto;          /* длинный контент — скроллим внутри */
+  max-height: 90vh;   
+  overflow-y: auto;       
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -867,7 +867,7 @@ button:focus-visible {
   pointer-events: auto;
 }
 
-.edit-drawer-handle { display: none; } /* грабер нужен только для bottom-sheet */
+.edit-drawer-handle { display: none; }
 
 .edit-drawer-title {
   font-size: 1.1rem;
@@ -876,7 +876,7 @@ button:focus-visible {
 }
 
 .field-row { display: flex; gap: var(--space-3); }
-.field-row .field { flex: 1; min-width: 0; } /* min-width:0 — иначе поля не ужимаются и распирают ряд */
+.field-row .field { flex: 1; min-width: 0; } 
 
 .field-textarea { resize: vertical; font-family: inherit; }
 
@@ -929,7 +929,7 @@ button:focus-visible {
   .app-main { padding: var(--space-6) var(--space-6) var(--space-6) 80px; }
   .plant-tile-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 }
-/* --- Единая форма подтверждения ухода --- */
+
 .confirm-backdrop {
   position: fixed;
   inset: 0;

@@ -1,9 +1,5 @@
-// js/services/CollectionApiService.js
 import { CollectionItem } from "../models/CollectionItem.js";
 
-// Публичный интерфейс этого класса (getAll/add/update/remove/markWatered/
-// markRepotted) — контракт, который также реализует CollectionMockService.
-// ViewModel работает с этим контрактом и не знает, какая реализация подставлена.
 export class CollectionApiService {
   constructor(httpClient) {
     this.http = httpClient;

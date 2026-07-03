@@ -1,9 +1,3 @@
-// js/core/Notifier.js
-// Абстракция уведомлений. ViewModel зовёт notifier.show("текст") и не знает,
-// что это всплывающий toast и как он рисуется — за это отвечает только
-// этот класс. При желании можно подменить на другую реализацию
-// (например баннер вместо toast) не трогая ViewModel.
-
 export class Notifier {
   constructor(toastElementId, durationMs) {
     this.el = document.getElementById(toastElementId);

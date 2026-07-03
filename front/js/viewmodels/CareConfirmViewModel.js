@@ -1,28 +1,21 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 
-// Единая форма подтверждения ухода (полив/пересадка). Один экземпляр на всё
-// приложение. Любой экран, вместо прямого collectionStore.markWatered,
-// вызывает request(...) — форма показывает подходящее сообщение (от лица
-// растения), а собственно мутацию делает только после подтверждения.
-// Так поливать можно откуда угодно, а UX подтверждения — единый и в одном месте.
-
-// Тексты собраны здесь, чтобы легко править. n — |daysLeft| (дней просрочки / до срока).
 const COPY = {
   water: {
     overdue: (name, n) => ({
-      emoji: "🥵",
+      emoji: "",
       title: `«${name}» хочет пить`,
       body: `«${name}»: «Пить! Я уже ${n} дн. как без воды.» Загляни — не пересох ли грунт, всё ли в порядке?`,
       confirm: "Полить 💧",
     }),
     early: (name, n) => ({
-      emoji: "🌊",
+      emoji: "",
       title: "Ещё рановато",
       body: `«${name}»: «Мне пока хватает воды — зальёшь, и я утону.» Полить на ${n} дн. раньше срока?`,
       confirm: "Всё равно полить",
     }),
     due: (name) => ({
-      emoji: "💧",
+      emoji: "",
       title: `Полить «${name}»?`,
       body: "Как раз пора освежить. Польём?",
       confirm: "Полить 💧",
@@ -30,27 +23,26 @@ const COPY = {
   },
   repot: {
     overdue: (name, n) => ({
-      emoji: "🪴",
+      emoji: "",
       title: `«${name}» перерос горшок`,
       body: `«${name}»: «Тесно мне тут, корни уже наружу лезут (${n} дн. просрочки).» Пересадим?`,
       confirm: "Пересадить 🪴",
     }),
     early: (name, n) => ({
-      emoji: "😌",
+      emoji: "",
       title: "Пересадка — это стресс",
       body: `«${name}»: «Мне ещё уютно в этом горшке.» Пересадить на ${n} дн. раньше срока?`,
       confirm: "Всё равно пересадить",
     }),
     due: (name) => ({
-      emoji: "🪴",
+      emoji: "",
       title: `Пересадить «${name}»?`,
       body: "Пора обновить горшок. Пересадим?",
-      confirm: "Пересадить 🪴",
+      confirm: "Пересадить",
     }),
   },
 };
 
-// Насколько раньше срока считается "рано" (дней до due). Для пересадки больше — интервалы длинные.
 const EARLY_THRESHOLD = { water: 2, repot: 14 };
 
 export class CareConfirmViewModel extends EventEmitter {
@@ -61,16 +53,15 @@ export class CareConfirmViewModel extends EventEmitter {
 
     this.state = {
       open: false,
-      tone: "due", // "overdue" | "early" | "due" — для акцентного цвета
+      tone: "due",
       emoji: "",
       title: "",
       body: "",
       confirmLabel: "",
-      pending: null, // { collectionId, action, onDone }
+      pending: null,
     };
   }
 
-  // Открыть подтверждение. daysLeft: дней до срока (минус = просрочено), null = не отследить.
   request({ collectionId, name, action, daysLeft, onDone = null }) {
     const tone = this.#tone(action, daysLeft);
     const n = daysLeft == null ? null : Math.abs(daysLeft);
@@ -105,7 +96,7 @@ export class CareConfirmViewModel extends EventEmitter {
       if (p.action === "water") await this.collectionStore.markWatered(p.collectionId);
       else await this.collectionStore.markRepotted(p.collectionId);
       this.notifier.show(p.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🌱");
-      p.onDone?.(); // экран-инициатор может доделать своё (напр. "выполнено сегодня")
+      p.onDone?.(); 
     } catch (err) {
       console.error(err);
     }

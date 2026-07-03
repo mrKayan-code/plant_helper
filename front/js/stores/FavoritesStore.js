@@ -1,9 +1,5 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 
-// Единственный источник правды для избранного. Хранит множество id
-// избранных растений. Все экраны (энциклопедия, сад) читают отсюда и
-// подписываются — рассинхрон вроде "отметил в саду, а в каталоге не видно"
-// становится невозможным by design. Singleton через ServiceContainer.
 export class FavoritesStore extends EventEmitter {
   #ids = new Set();
   #loaded = false;

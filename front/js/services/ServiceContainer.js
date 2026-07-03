@@ -1,4 +1,3 @@
-// js/services/ServiceContainer.js
 import { config } from "../config.js";
 import { TokenStorage } from "../core/TokenStorage.js";
 import { Notifier } from "../core/Notifier.js";
@@ -19,14 +18,6 @@ import { CollectionStore } from "../stores/CollectionStore.js";
 import { FavoritesStore } from "../stores/FavoritesStore.js";
 import { RemindersStore } from "../stores/RemindersStore.js";
 
-// Composition root: единственное место во всём приложении, где решается,
-// какая реализация сервиса (реальная или мок) используется. ViewModel
-// получает уже готовый объект через конструктор и понятия не имеет,
-// откуда он взялся (Dependency Inversion Principle из SOLID).
-//
-// Чтобы включить реальный /collection, когда бэк его доделает — меняете
-// config.useMocks.collection на false. Ни один файл вне этого класса
-// трогать не нужно.
 export class ServiceContainer {
   constructor() {
     this.tokenStorage = new TokenStorage();
@@ -39,7 +30,6 @@ export class ServiceContainer {
       () => this.onUnauthorized?.()
     );
 
-    // Справочник — всегда реальный API, бэк отдаёт его с первого коммита.
     this.plantsService = new PlantsApiService(this.http);
 
     this.collectionService = config.useMocks.collection
@@ -58,12 +48,8 @@ export class ServiceContainer {
       ? new AuthMockService(this.tokenStorage)
       : new AuthApiService(this.http, this.tokenStorage);
 
-    // --- Сторы: единый источник правды для доменных данных ---
-    // Один экземпляр на всё приложение (singleton через контейнер).
-    // ViewModel'и читают отсюда и подписываются, вместо своей копии.
     this.collectionStore = new CollectionStore(this.collectionService);
     this.favoritesStore = new FavoritesStore(this.favoritesService);
-    // remindersStore зависит от collectionStore (производное состояние)
     this.remindersStore = new RemindersStore(this.remindersService, this.collectionStore);
   }
 }

@@ -1,4 +1,3 @@
-// js/services/RemindersApiService.js
 import { Reminder } from "../models/Reminder.js";
 
 export class RemindersApiService {
