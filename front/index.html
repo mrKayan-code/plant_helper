@@ -72,7 +72,34 @@
     </section>
 
     <section class="screen" id="screen-catalog">
-      <div class="stub"><span class="stub-leaf"></span><p>Энциклопедия — следующий шаг</p></div>
+
+      <div class="catalog-view" id="catalogListView">
+        <div class="catalog-header">
+          <h2 class="page-title">Энциклопедия растений</h2>
+          <div class="search-bar">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              type="text"
+              id="catalogSearchInput"
+              class="search-input"
+              placeholder="Найти растение по названию…"
+              autocomplete="off"
+            >
+          </div>
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid">
+          <p class="empty-hint">Загрузка справочника…</p>
+        </div>
+      </div>
+
+      <div class="catalog-view" id="catalogDetailView" hidden>
+        <button class="back-btn" id="catalogBackBtn">← Назад к энциклопедии</button>
+
+        <div class="detail-card" id="catalogDetailCard">
+        </div>
+      </div>
+
     </section>
 
     <section class="screen" id="screen-garden">
@@ -95,5 +122,6 @@
   <script src="js/api.js"></script>
   <script src="js/screens.js"></script>
   <script src="js/home.js"></script>
+  <script src="js/catalog.js"></script>
 </body>
 </html>

@@ -1,10 +1,3 @@
-// js/api.js
-// Единая точка входа для всех запросов к бэку.
-// Пока /auth, /collection, /favorites, /reminders не готовы на сервере —
-// отдаём моки той же формы, что зафиксирована в контракте (../plan.md).
-// Когда бэкендер объявит эндпоинт готовым — просто переключить
-// соответствующий флаг ниже на false, остальной код не трогаем.
-
 const API_BASE = "http://localhost:3000/api";
 
 const MOCKS_ENABLED = {
@@ -28,7 +21,6 @@ function showToast(message) {
 }
 
 async function api(path, { method = "GET", body } = {}) {
-  // --- маршрутизация в моки, пока бэк не готов ---
   if (MOCKS_ENABLED.collection && path.startsWith("/collection")) {
     return mockCollection(path, method, body);
   }
@@ -42,8 +34,8 @@ async function api(path, { method = "GET", body } = {}) {
     return mockAuth(path, body);
   }
 
-  // --- реальный запрос (справочник /plants уже отвечает) ---
-  const headers = { "Content-Type": "application/json" };
+  const headers = {};
+  if (body) headers["Content-Type"] = "application/json";
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -62,7 +54,7 @@ async function api(path, { method = "GET", body } = {}) {
   if (res.status === 401) {
     localStorage.removeItem("token");
     showToast("Сессия истекла, войдите заново");
-    showScreen("home"); // логина пока нет как отдельного экрана — план на след. шаг
+    showScreen("home"); 
     throw new Error("Unauthorized");
   }
 
@@ -77,10 +69,6 @@ async function api(path, { method = "GET", body } = {}) {
   return res.json();
 }
 
-/* ==========================================================
-   МОКИ — форма ответов копирует контракт из ../plan.md один в один,
-   чтобы переключение на реальный бэк не потребовало правок в остальном коде.
-   ========================================================== */
 
 let _mockCollectionData = [
   {
