@@ -113,21 +113,22 @@ db.js                — соединение с SQLite + схема + seed (sin
 
 ---
 
-## Шаг 8 — Избранное (`src/routes/favorites.js`) — защищён
-- [ ] `GET /api/favorites` — JOIN с plants
-- [ ] `POST /api/favorites` — `{ plantId }` (idempotent, INSERT OR IGNORE)
-- [ ] `DELETE /api/favorites/:plantId`
+## Шаг 8 — Избранное (`src/routes/favorites.js`) — защищён ✅
+- [x] `GET /api/favorites` — JOIN с plants (форма как `/plants`)
+- [x] `POST /api/favorites` — `{ plantId }` (idempotent, INSERT OR IGNORE); 400/404
+- [x] `DELETE /api/favorites/:plantId` (204)
 
-**Проверка:** добавил/удалил избранное, GET отражает.
+**Проверка:** ✅ add×2 + повтор идемпотентен + GET=2 + 404 на 999 + delete + 401.
 
 ---
 
-## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён
-- [ ] `GET /api/reminders` — по коллекции юзера вычислить `due` (полив + пересадка):
-      `effective_interval` = из collection, иначе из plants; если интервал/дата пусты — пропускаем
-- [x] ~~`/watered` и `/repotted`~~ — уже сделаны в Шаге 7
+## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён ✅
+- [x] `GET /api/reminders` — полив + пересадка; окно «до завтра включительно» (под HomeViewModel фронта)
+- [x] `effective_interval` = из collection, иначе из plants; пустой интервал/дата → пропуск
+- [x] форма `{collectionId, plantId, name, action, dueDate}` = модель Reminder фронта
+- [x] ~~`/watered` и `/repotted`~~ — сделаны в Шаге 7
 
-**Проверка:** растение с прошедшей датой полива попадает в `/api/reminders`; после `/watered` — исчезает.
+**Проверка:** ✅ нет дат → []; полит 30д назад (интервал 7) → напоминание; после /watered → [].
 
 ---
 
