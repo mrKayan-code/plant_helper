@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { usersRepo } from '../repositories/users.repo.js';
 import { hashPassword, verifyPassword, signToken } from '../auth.js';
 import { serializeUser } from '../serialize.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 
 const router = Router();
 
@@ -47,4 +48,15 @@ router.post('/login', (req, res) => {
   res.json({ token: signToken(row.id), user: serializeUser(row) });
 });
 
+// GET /api/auth/me — текущий пользователь по токену (защищён)
+router.get('/me', requireAuth, (req, res) => {
+  const user = usersRepo.findById(req.userId);
+  if (!user) {
+    // токен валиден, но юзера уже нет (напр. удалён) — тоже разлогинить
+    return res.status(401).json({ error: 'Пользователь не найден' });
+  }
+  res.json(serializeUser(user));
+});
+
 export default router;
+

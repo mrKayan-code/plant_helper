@@ -92,12 +92,12 @@ db.js                — соединение с SQLite + схема + seed (sin
 
 ---
 
-## Шаг 6 — Middleware защиты (`src/middleware/requireAuth.js`)
-- [ ] Достать `Authorization: Bearer <token>`, verify, положить `req.userId`
-- [ ] Нет/битый токен → 401
-- [ ] `GET /api/auth/me` — вернуть пользователя по `req.userId`
+## Шаг 6 — Middleware защиты (`src/middleware/requireAuth.js`) ✅
+- [x] Достать `Authorization: Bearer <token>`, verify, положить `req.userId`
+- [x] Нет / без Bearer / битый / просроченный токен → 401 `{error}`
+- [x] `GET /api/auth/me` — пользователь по `req.userId` (401 если юзер удалён)
 
-**Проверка:** `/api/auth/me` без токена → 401, с токеном → данные юзера.
+**Проверка:** ✅ без токена/битый/без Bearer → 401; валидный → 200 `{id, email}`.
 
 ---
 
