@@ -126,3 +126,8 @@
 - **CORS:** `cors()` без опций = разрешены все origin (`*`). Для хакатон-демо ок; на прод сузить.
 - **Публичность справочника:** `/api/plants*` монтируем БЕЗ `requireAuth` — работает даже если auth сломан.
 - **Напоминания:** пересадка считается по `repot_interval_days` (добавлено в plants + override в collection).
+- **Даты ухода — только `YYYY-MM-DD`** (без времени). В БД `added_at` дефолт `date('now')`.
+  При `/watered` и `/repotted` ставить `date('now')` (или `new Date().toISOString().slice(0,10)`).
+  `users.created_at` — внутреннее, в API не отдаём.
+- **`/repotted`** — гарантированный эндпоинт, симметричен `/watered` (кнопка «пересадил» на фронте).
+- **Дубликаты в collection разрешены** (два фикуса), в favorites — нет (PK). Не добавлять UNIQUE в collection.

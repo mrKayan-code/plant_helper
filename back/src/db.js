@@ -35,7 +35,7 @@ db.exec(`
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id             INTEGER NOT NULL,
     plant_id            INTEGER NOT NULL,   -- ссылка на карточку справочника
-    added_at            TEXT NOT NULL DEFAULT (datetime('now')),
+    added_at            TEXT NOT NULL DEFAULT (date('now')),  -- YYYY-MM-DD (без времени)
     note                TEXT,               -- заметки пользователя
     water_interval_days INTEGER,            -- переопределение интервала полива (иначе из plants)
     repot_interval_days INTEGER,            -- переопределение интервала пересадки (иначе из plants)
