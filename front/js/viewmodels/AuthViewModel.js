@@ -1,8 +1,5 @@
-// js/viewmodels/AuthViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
 
-// ViewModel аккаунта. Не знает про DOM — только состояние (вошли/не вошли,
-// открыта ли модалка, режим формы, ошибка, email) и вызовы authService.
 export class AuthViewModel extends EventEmitter {
   constructor(authService, tokenStorage) {
     super();
@@ -12,11 +9,22 @@ export class AuthViewModel extends EventEmitter {
     this.state = {
       isAuthenticated: !!this.tokenStorage.get(),
       modalOpen: false,
-      mode: "login", // "login" | "register"
+      mode: "login", 
       submitting: false,
       error: null,
       email: null,
     };
+  }
+
+  async init() {
+    if (!this.state.isAuthenticated) return;
+    try {
+      const user = await this.authService.me();
+      this.state = { ...this.state, email: user.email };
+      this.emit("change", this.state);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   openModal() {
@@ -49,7 +57,7 @@ export class AuthViewModel extends EventEmitter {
 
       this.state.isAuthenticated = true;
       this.state.email = user?.email ?? email;
-      this.state.modalOpen = false; // успешный вход/регистрация — закрываем модалку сами
+      this.state.modalOpen = false; 
     } catch (err) {
       this.state.error = err.message || "Не удалось войти";
     }
