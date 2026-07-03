@@ -45,12 +45,20 @@ export const collectionRepo = {
       .get(id, userId);
   },
 
-  /** Добавить растение в список, вернуть готовый элемент (с карточкой). */
+  /**
+   * Добавить растение в список, вернуть готовый элемент (с карточкой).
+   * last_watered_at / last_repotted_at инициализируем сегодняшней датой —
+   * так у растения сразу появляется точка отсчёта, от которой считается
+   * расписание ухода (иначе напоминания невозможно вычислить). Пользователь
+   * может переопределить даты позже через отметки "полил"/"пересадил".
+   */
   create(userId, { plantId, note, waterIntervalDays, repotIntervalDays }) {
     const info = db
       .prepare(`
-        INSERT INTO collection (user_id, plant_id, note, water_interval_days, repot_interval_days)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO collection
+          (user_id, plant_id, note, water_interval_days, repot_interval_days,
+           last_watered_at, last_repotted_at)
+        VALUES (?, ?, ?, ?, ?, date('now'), date('now'))
       `)
       .run(userId, plantId, note ?? null, waterIntervalDays ?? null, repotIntervalDays ?? null);
     return this.findOne(userId, info.lastInsertRowid);

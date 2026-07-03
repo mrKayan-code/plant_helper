@@ -9,3 +9,10 @@ export function addDaysISO(dateStr, days) {
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+// Сколько дней от fromISO до toISO (может быть отрицательным, если to раньше from)
+export function daysBetweenISO(fromISO, toISO) {
+  const from = new Date(fromISO + "T00:00:00Z");
+  const to = new Date(toISO + "T00:00:00Z");
+  return Math.round((to - from) / (1000 * 60 * 60 * 24));
+}

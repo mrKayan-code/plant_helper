@@ -2,8 +2,9 @@ import { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 
-// Файл БД лежит в back/data/plant_helper.db
-const DB_PATH = join(import.meta.dirname, '..', 'data', 'plant_helper.db');
+// Файл БД: по умолчанию back/data/plant_helper.db, можно переопределить DB_PATH
+// (удобно для изолированных тестов, чтобы не трогать рабочую базу).
+const DB_PATH = process.env.DB_PATH || join(import.meta.dirname, '..', 'data', 'plant_helper.db');
 
 export const db = new DatabaseSync(DB_PATH);
 

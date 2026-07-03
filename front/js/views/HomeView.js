@@ -1,4 +1,3 @@
-// js/views/HomeView.js
 
 function greetingByTime() {
   const h = new Date().getHours();
@@ -16,9 +15,6 @@ function taskActionLabel(action) {
   return action === "water" ? "Пора полить" : "Пора пересадить";
 }
 
-// View Главного экрана. Единственная ответственность: отрисовать то, что
-// лежит в viewModel.state, и передать пользовательский клик обратно во
-// ViewModel. Сеть, подсчёт статистики, фильтрация задач — НЕ здесь.
 export class HomeView {
   constructor(viewModel) {
     this.vm = viewModel;
@@ -35,18 +31,26 @@ export class HomeView {
     this.vm.on("change", (state) => this.render(state));
   }
 
-  // Вызывается Router'ом каждый раз при показе экрана — поэтому данные
-  // всегда свежие, а не те, что были при первой загрузке страницы.
   onShow() {
     this.els.greeting.textContent = greetingByTime();
     this.vm.load();
   }
 
   render(state) {
+    if (state.error) {
+      this.els.statTotal.textContent = "–";
+      this.els.statNeedsCare.textContent = "–";
+      const msg = `<p class="empty-hint">${state.error}</p>`;
+      this.els.urgent.innerHTML = msg;
+      this.els.upcoming.innerHTML = "";
+      this.els.recent.innerHTML = msg;
+      return;
+    }
+
     this.els.statTotal.textContent = state.loading ? "–" : state.totalPlants;
     this.els.statNeedsCare.textContent = state.loading ? "–" : state.plantsNeedingCare;
 
-    this.renderTaskList(this.els.urgent, state.urgentTasks, state.loading, "Срочных задач нет 🌿");
+    this.renderTaskList(this.els.urgent, state.urgentTasks, state.loading, "Срочных задач нет ");
     this.renderTaskList(this.els.upcoming, state.upcomingTasks, state.loading, "На завтра ничего не запланировано");
     this.renderPlantTiles(state.recentPlants, state.loading);
   }
@@ -74,7 +78,7 @@ export class HomeView {
         <div class="task-action">${taskActionLabel(task.action)}</div>
       </div>
     `;
-    row.querySelector(".task-plant-name").textContent = task.name; // textContent — не innerHTML
+    row.querySelector(".task-plant-name").textContent = task.name; 
     return row;
   }
 

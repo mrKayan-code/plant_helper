@@ -1,4 +1,3 @@
-// js/views/CatalogView.js
 import { config } from "../config.js";
 
 const DETAIL_TABS = [
@@ -7,9 +6,6 @@ const DETAIL_TABS = [
   { id: "danger", label: "Опасность" },
 ];
 
-// View экрана "Энциклопедия". Читает viewModel.state и рисует DOM;
-// пользовательские действия (клик, ввод) только вызывают методы ViewModel,
-// сама View не решает, что "правильно" делать дальше.
 export class CatalogView {
   constructor(viewModel) {
     this.vm = viewModel;
@@ -22,6 +18,7 @@ export class CatalogView {
       grid: document.getElementById("catalogGrid"),
       backBtn: document.getElementById("catalogBackBtn"),
       detailCard: document.getElementById("catalogDetailCard"),
+      filterChips: document.querySelectorAll("[data-catalog-filter]"),
     };
 
     this.els.searchInput.addEventListener("input", () => {
@@ -32,14 +29,20 @@ export class CatalogView {
 
     this.els.backBtn.addEventListener("click", () => this.vm.backToList());
 
+    this.els.filterChips.forEach((btn) => {
+      btn.addEventListener("click", () => this.vm.setViewFilter(btn.dataset.catalogFilter));
+    });
+
     this.vm.on("change", (state) => this.render(state));
   }
 
   onShow() {
-    // Загружаем справочник только при первом заходе на экран за сессию —
-    // повторный показ не должен бить лишними запросами по /plants.
     if (this.vm.state.plants.length === 0 && !this.vm.state.error) {
       this.vm.init();
+    } else {
+      // справочник уже загружен — обновляем только избранное (могло измениться
+      // в «Мой сад» или при смене аккаунта)
+      this.vm.reloadFavorites();
     }
   }
 
@@ -47,6 +50,10 @@ export class CatalogView {
     const isDetail = state.mode === "detail";
     this.els.listView.hidden = isDetail;
     this.els.detailView.hidden = !isDetail;
+
+    this.els.filterChips.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.catalogFilter === state.viewFilter);
+    });
 
     isDetail ? this.renderDetail(state) : this.renderList(state);
   }
@@ -63,20 +70,29 @@ export class CatalogView {
       grid.innerHTML = `<p class="empty-hint">${state.error}</p>`;
       return;
     }
-    if (state.plants.length === 0) {
-      grid.innerHTML = `<p class="empty-hint">Ничего не найдено — попробуйте другой запрос</p>`;
+
+    const plants = this.vm.getVisiblePlants();
+    if (plants.length === 0) {
+      grid.innerHTML = state.viewFilter === "favorites"
+        ? `<p class="empty-hint">Пока нет избранных растений — нажмите ★ на карточке, чтобы добавить</p>`
+        : `<p class="empty-hint">Ничего не найдено — попробуйте другой запрос</p>`;
       return;
     }
-    state.plants.forEach((plant) => grid.appendChild(this.buildCard(plant)));
+    plants.forEach((plant) => grid.appendChild(this.buildCard(plant)));
   }
 
   buildCard(plant) {
-    const card = document.createElement("button");
+    const card = document.createElement("div");
     card.className = "catalog-card";
-    card.type = "button";
+    card.setAttribute("role", "button");
+    card.tabIndex = 0;
+
+    const isFav = this.vm.isFavorite(plant.id);
+
     card.innerHTML = `
       <div class="catalog-card-img-wrap">
         <img class="catalog-card-img" alt="">
+        <button class="card-favorite-btn" title="В избранное">${isFav ? "★" : "☆"}</button>
         ${plant.isToxic ? '<span class="badge badge-toxic" title="Ядовито для животных">☠️</span>' : ""}
       </div>
       <div class="catalog-card-body">
@@ -92,7 +108,21 @@ export class CatalogView {
     img.alt = plant.name;
     img.onerror = () => { img.style.display = "none"; };
     card.querySelector(".catalog-card-name").textContent = plant.name;
+
+    const favBtn = card.querySelector(".card-favorite-btn");
+    favBtn.addEventListener("click", (e) => {
+      e.stopPropagation(); // не открывать деталку при клике на звёздочку
+      this.vm.toggleFavorite(plant.id);
+    });
+
     card.addEventListener("click", () => this.vm.openDetail(plant.id));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        this.vm.openDetail(plant.id);
+      }
+    });
+
     return card;
   }
 
@@ -152,7 +182,7 @@ export class CatalogView {
         { icon: "💧", label: "Полив", value: plant.watering },
         { icon: "☀️", label: "Освещение", value: plant.light },
       ],
-      repotting: [{ icon: "🪴", label: "Пересадка", value: plant.repotting }],
+      repotting: [{ icon: "🌱", label: "Пересадка", value: plant.repotting }],
       danger: [{ icon: "⚠️", label: "Ядовитость", value: plant.toxicity }],
     };
 

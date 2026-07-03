@@ -121,30 +121,34 @@ db.js                — соединение с SQLite + схема + seed (sin
 
 ---
 
-## Шаг 8 — Избранное (`src/routes/favorites.js`) — защищён
+## Шаг 8 — Избранное (`src/routes/favorites.js`) — защищён ✅
 
-- [ ] `GET /api/favorites` — JOIN с plants
-- [ ] `POST /api/favorites` — `{ plantId }` (idempotent, INSERT OR IGNORE)
-- [ ] `DELETE /api/favorites/:plantId`
+- [x] `GET /api/favorites` — JOIN с plants (форма как `/plants`)
+- [x] `POST /api/favorites` — `{ plantId }` (idempotent, INSERT OR IGNORE); 400/404
+- [x] `DELETE /api/favorites/:plantId` (204)
 
-**Проверка:** добавил/удалил избранное, GET отражает.
-
----
-
-## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён
-
-- [ ] `GET /api/reminders` — по коллекции юзера вычислить `due` (полив + пересадка):
-      `effective_interval` = из collection, иначе из plants; если интервал/дата пусты — пропускаем
-- [x] ~~`/watered` и `/repotted`~~ — уже сделаны в Шаге 7
-
-**Проверка:** растение с прошедшей датой полива попадает в `/api/reminders`; после `/watered` — исчезает.
+**Проверка:** ✅ add×2 + повтор идемпотентен + GET=2 + 404 на 999 + delete + 401.
 
 ---
 
-## Шаг 10 — Стыковка с фронтом 🎯 (цель — рабочее демо)
+## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён ✅
 
-- [ ] Прогнать весь путь: register → список растений → добавить в коллекцию → напоминание → отметить полив
-- [ ] Пофиксить CORS/ошибки, которые всплывут при реальных запросах фронта
+- [x] `GET /api/reminders` — полив + пересадка; окно «до завтра включительно» (под HomeViewModel фронта)
+- [x] `effective_interval` = из collection, иначе из plants; пустой интервал/дата → пропуск
+- [x] форма `{collectionId, plantId, name, action, dueDate}` = модель Reminder фронта
+- [x] ~~`/watered` и `/repotted`~~ — сделаны в Шаге 7
+
+**Проверка:** ✅ нет дат → []; полит 30д назад (интервал 7) → напоминание; после /watered → [].
+
+---
+
+## Шаг 10 — Стыковка с фронтом 🎯 (цель — рабочее демо) ✅ (API-уровень)
+
+- [x] Полный путь через реальный API + браузерный Origin: register → me → каталог → collection → reminders → watered → favorites — всё зелёное
+- [x] CORS проверен: preflight OPTIONS → 204 с authorization/content-type; обычные запросы → Allow-Origin \*
+- [x] Форматы совпали с сервисами фронта (AuthApiService, модель Reminder)
+- [x] front/js/config.js: все моки → false (весь API реальный)
+- [ ] Финальная проверка в браузере (делает человек: register → сад → напоминание → полив)
 
 ---
 
@@ -155,6 +159,36 @@ db.js                — соединение с SQLite + схема + seed (sin
 - [ ] Распознавание по фото
 
 ---
+
+## Хардненинг (после Шага 9) ✅
+
+- [x] 404-handler: несуществующие пути/методы → `{error}` JSON (не HTML «Cannot GET»)
+- [x] централизованный error-handler: битый JSON в теле → 400 `{error}`; прочие исключения → 500 `{error}`
+- Теперь ВСЕ ответы об ошибках соответствуют контракту `{ "error": "..." }`.
+
+## Багфикс: напоминания не появлялись ✅
+
+Симптом: добавленное растение не давало задач; ручная настройка интервалов не помогала.
+Причина (бэк): (1) `create` не ставил `last_watered_at`/`last_repotted_at` → расписание
+не с чего считать; (2) `/reminders` резал окном «до завтра» → фильтр «Все» пустой.
+Фикс: (1) `create` ставит обе даты = `date('now')`; (2) `/reminders` отдаёт полное
+расписание без окна. Фронт раскладывает по бакетам (см. `front/FIX-reminders.md`).
+
+## Багфикс: интервал 0 и пустой POST favorites ✅
+
+- `/reminders`: truthy-проверка `!interval` съедала интервал `0` → явная `interval == null`.
+- `POST /favorites`: отдавал пустой `201` → клиентский `res.json()` падал (SyntaxError).
+  Теперь `201` + карточка растения (консистентно с `POST /collection`). Фронт может
+  вернуть `favorites` на реальный API. У фронта та же 0-проверка в GardenViewModel — см. FIX-reminders.md.
+
+## Админка + диагностика (dev-tools) ✅
+
+- `routes/admin.js` + `public/admin.html` → `/admin` (флаг `ADMIN_ENABLED=true`).
+  Просмотр/правка таблиц, менять `last_watered_at` задним числом для проверки напоминаний.
+  Без авторизации — только dev. API: `/api/admin/tables`, `/api/admin/table/:name` (GET/PATCH/DELETE).
+- `DB_PATH` env — переопределение файла БД (изолированные тесты, не трогаем рабочую базу).
+- Проверено: БД персистентна между рестартами (аккаунты НЕ слетают); favorites — по аккаунтам, в БД.
+  «Странность» избранного была из-за `favorites: true` (мок) в front/config.js — переключено на false.
 
 ## Заметки / решения по ходу
 

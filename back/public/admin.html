@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plant Helper — Admin (dev)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; margin: 0; background: #0f1720; color: #e6edf3; }
+  header { padding: 12px 20px; background: #16212e; border-bottom: 1px solid #26313f; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 16px; margin: 0; color: #7ee787; }
+  .badge { font-size: 11px; background: #3d1d1d; color: #ff9b9b; padding: 2px 8px; border-radius: 10px; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 20px; }
+  .tab { cursor: pointer; border: 1px solid #30363d; background: #1c2733; color: #e6edf3; padding: 6px 12px; border-radius: 6px; font-size: 13px; }
+  .tab.active { background: #238636; border-color: #2ea043; }
+  .tab .cnt { opacity: .6; margin-left: 6px; }
+  main { padding: 0 20px 40px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid #30363d; padding: 4px 6px; text-align: left; white-space: nowrap; }
+  th { background: #1c2733; position: sticky; top: 0; }
+  input { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 3px 5px; font-size: 12px; width: 100%; min-width: 90px; }
+  input:focus { border-color: #2ea043; outline: none; }
+  input::placeholder { color: #6ba46b; font-style: italic; }
+  .btn { cursor: pointer; border: none; border-radius: 5px; padding: 4px 10px; font-size: 12px; color: #fff; }
+  .save { background: #238636; } .del { background: #a1281f; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .hint { color: #8b949e; font-size: 12px; padding: 8px 20px; }
+  .toast { position: fixed; bottom: 20px; right: 20px; background: #238636; color: #fff; padding: 10px 16px; border-radius: 8px; opacity: 0; transition: .2s; }
+  .toast.show { opacity: 1; } .toast.err { background: #a1281f; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🌱 Plant Helper — Admin</h1>
+    <span class="badge">DEV ONLY · без авторизации</span>
+    <button class="tab" onclick="loadTables()">⟳ Обновить</button>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <p class="hint" id="hint"></p>
+  <main><table id="grid"></table></main>
+  <div class="toast" id="toast"></div>
+
+<script>
+const API = "/api/admin";
+let current = null;
+
+function toast(msg, isErr) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show" + (isErr ? " err" : "");
+  setTimeout(() => t.className = "toast", 2500);
+}
+
+async function loadTables() {
+  const tables = await fetch(`${API}/tables`).then(r => r.json());
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  tables.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "tab" + (t.name === current ? " active" : "");
+    b.innerHTML = `${t.name}<span class="cnt">${t.count}</span>`;
+    b.onclick = () => loadTable(t.name);
+    tabs.appendChild(b);
+  });
+  if (!current && tables.length) loadTable(tables[0].name);
+  else if (current) loadTable(current);
+}
+
+async function loadTable(name) {
+  current = name;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.textContent.startsWith(name)));
+  const data = await fetch(`${API}/table/${name}`).then(r => r.json());
+  document.getElementById("hint").textContent = data.editable
+    ? `Таблица «${name}»: правь ячейки и жми «Сохранить». Даты — формат YYYY-MM-DD.`
+    : `Таблица «${name}»: только просмотр (нет колонки id).`;
+  renderGrid(data);
+}
+
+function renderGrid({ table, columns, rows, editable, hints }) {
+  const grid = document.getElementById("grid");
+  const head = "<tr>" + columns.map(c => `<th>${c}</th>`).join("") + (editable ? "<th>действия</th>" : "") + "</tr>";
+  const body = rows.map(row => {
+    const cells = columns.map(c => {
+      const val = row[c] == null ? "" : row[c];
+      const readonly = c === "id" ? "readonly" : "";
+      // Для collection: если графа интервала пустая — подсказываем дефолт из справочника
+      const hint = (val === "" && hints && hints[row.id] && hints[row.id][c] != null)
+        ? `placeholder="default = ${hints[row.id][c]}"` : "";
+      return `<td><input data-col="${c}" value="${String(val).replace(/"/g, "&quot;")}" ${readonly} ${hint}></td>`;
+    }).join("");
+    const actions = editable
+      ? `<td><button class="btn save" onclick="saveRow(this, ${row.id})">Сохранить</button>
+             <button class="btn del" onclick="delRow(${row.id})">Удалить</button></td>`
+      : "";
+    return `<tr>${cells}${actions}</tr>`;
+  }).join("");
+  grid.innerHTML = head + body || head;
+  if (!rows.length) grid.innerHTML += `<tr><td colspan="99" style="color:#8b949e">пусто</td></tr>`;
+}
+
+async function saveRow(btn, id) {
+  const tr = btn.closest("tr");
+  const patch = {};
+  tr.querySelectorAll("input[data-col]").forEach(inp => {
+    if (inp.dataset.col !== "id") patch[inp.dataset.col] = inp.value;
+  });
+  btn.disabled = true;
+  const res = await fetch(`${API}/table/${current}/${id}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch),
+  });
+  btn.disabled = false;
+  if (res.ok) { toast(`Строка ${id} сохранена`); }
+  else { const e = await res.json().catch(() => ({})); toast(e.error || "Ошибка", true); }
+}
+
+async function delRow(id) {
+  if (!confirm(`Удалить строку ${id} из «${current}»?`)) return;
+  const res = await fetch(`${API}/table/${current}/${id}`, { method: "DELETE" });
+  if (res.ok) { toast(`Строка ${id} удалена`); loadTables(); }
+  else { const e = await res.json().catch(() => ({})); toast(e.error || "Ошибка", true); }
+}
+
+loadTables();
+</script>
+</body>
+</html>

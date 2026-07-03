@@ -15,6 +15,10 @@ import { FavoritesMockService } from "./mocks/FavoritesMockService.js";
 import { RemindersMockService } from "./mocks/RemindersMockService.js";
 import { AuthMockService } from "./mocks/AuthMockService.js";
 
+import { CollectionStore } from "../stores/CollectionStore.js";
+import { FavoritesStore } from "../stores/FavoritesStore.js";
+import { RemindersStore } from "../stores/RemindersStore.js";
+
 // Composition root: единственное место во всём приложении, где решается,
 // какая реализация сервиса (реальная или мок) используется. ViewModel
 // получает уже готовый объект через конструктор и понятия не имеет,
@@ -53,5 +57,13 @@ export class ServiceContainer {
     this.authService = config.useMocks.auth
       ? new AuthMockService(this.tokenStorage)
       : new AuthApiService(this.http, this.tokenStorage);
+
+    // --- Сторы: единый источник правды для доменных данных ---
+    // Один экземпляр на всё приложение (singleton через контейнер).
+    // ViewModel'и читают отсюда и подписываются, вместо своей копии.
+    this.collectionStore = new CollectionStore(this.collectionService);
+    this.favoritesStore = new FavoritesStore(this.favoritesService);
+    // remindersStore зависит от collectionStore (производное состояние)
+    this.remindersStore = new RemindersStore(this.remindersService, this.collectionStore);
   }
 }

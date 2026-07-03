@@ -34,7 +34,7 @@ export class HttpClient {
 
     if (res.status === 401) {
       this.tokenStorage.clear();
-      this.notifier?.show("Сессия истекла, войдите заново");
+      this.notifier?.show("Войдите, чтобы продолжить");
       this.onUnauthorized?.();
       throw new Error("Unauthorized");
     }
