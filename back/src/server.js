@@ -26,6 +26,22 @@ app.use('/api/collection', collectionRouter); // личный список (за
 app.use('/api/favorites', favoritesRouter);   // избранное (защищён)
 app.use('/api/reminders', remindersRouter);   // напоминания (защищён)
 
+// --- 404: ни один роут не подошёл → JSON, а не HTML ---
+app.use((req, res) => {
+  res.status(404).json({ error: 'Эндпоинт не найден' });
+});
+
+// --- централизованный обработчик ошибок (4 аргумента = error middleware) ---
+// ловит битый JSON в теле, брошенные исключения из роутов и т.п.
+app.use((err, req, res, next) => {
+  // невалидный JSON в теле запроса (express.json бросает SyntaxError со status 400)
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    return res.status(400).json({ error: 'Некорректный JSON в теле запроса' });
+  }
+  console.error('Необработанная ошибка:', err);
+  res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+});
+
 app.listen(PORT, () => {
   console.log(`Plant Helper API запущен: http://localhost:${PORT}`);
 });

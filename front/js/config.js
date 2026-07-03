@@ -6,14 +6,13 @@
 export const config = {
   apiBaseUrl: "http://localhost:3000/api",
 
-  // Пока бэк не готов отдавать эти ресурсы — сервис-контейнер подставит
-  // мок-реализацию с тем же интерфейсом. Когда эндпоинт готов — меняете
-  // true на false ЗДЕСЬ. ViewModel и View это изменение не затрагивает.
+  // Отражает реальный статус бэка (see back/plan.md):
+  // Шаги 5,7,8,9 готовы — весь API реальный, моки выключены.
   useMocks: {
-    auth: true,
-    collection: true,
-    favorites: true,
-    reminders: true,
+    auth: false,
+    collection: false,
+    favorites: false,
+    reminders: false,
   },
 
   search: {
