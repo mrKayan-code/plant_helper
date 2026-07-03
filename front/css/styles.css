@@ -215,6 +215,7 @@ button:focus-visible {
   color: var(--color-text-muted);
 }
 .field-input {
+  width: 100%;               /* иначе input/textarea берут свою интринзик-ширину и вылезают */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-3);
@@ -845,26 +846,28 @@ button:focus-visible {
 .edit-drawer {
   position: fixed;
   left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 100%);
-  width: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  opacity: 0;
+  pointer-events: none;      /* закрытая модалка не перехватывает клики */
+  width: calc(100% - var(--space-4) * 2); /* поля по бокам на узких экранах */
   max-width: 480px;
+  max-height: 90vh;          /* не выше экрана */
+  overflow-y: auto;          /* длинный контент — скроллим внутри */
   background: var(--color-surface);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
-  box-shadow: 0 -4px 24px rgba(31, 46, 34, 0.15);
+  box-shadow: 0 12px 40px rgba(31, 46, 34, 0.25);
   z-index: 56;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
 }
-.edit-drawer.open { transform: translate(-50%, 0); }
+.edit-drawer.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
 
-.edit-drawer-handle {
-  width: 40px;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 2px;
-  margin: 0 auto var(--space-4);
-}
+.edit-drawer-handle { display: none; } /* грабер нужен только для bottom-sheet */
 
 .edit-drawer-title {
   font-size: 1.1rem;
@@ -873,7 +876,7 @@ button:focus-visible {
 }
 
 .field-row { display: flex; gap: var(--space-3); }
-.field-row .field { flex: 1; }
+.field-row .field { flex: 1; min-width: 0; } /* min-width:0 — иначе поля не ужимаются и распирают ряд */
 
 .field-textarea { resize: vertical; font-family: inherit; }
 
