@@ -101,7 +101,7 @@ export class GardenView {
   }
 
   formatCareBadge(action, status) {
-    const icon = action === "water" ? "💧" : "🪴";
+    const icon = action === "water" ? "💧" : "🌱";
     const label = action === "water" ? "Полить" : "Пересадить";
 
     if (!status.tracked) {
@@ -128,7 +128,7 @@ export class GardenView {
     wrap.className = "garden-actions";
     wrap.innerHTML = `
       <button class="icon-btn" data-action="water" title="Полить">💧</button>
-      <button class="icon-btn" data-action="repot" title="Пересадить">🪴</button>
+      <button class="icon-btn" data-action="repot" title="Пересадить">🌱</button>
       <button class="icon-btn" data-action="edit" title="Редактировать">✏️</button>
       <button class="icon-btn icon-btn--danger" data-action="delete" title="Удалить">🗑️</button>
     `;

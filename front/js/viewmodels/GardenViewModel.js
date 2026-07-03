@@ -176,7 +176,7 @@ export class GardenViewModel extends EventEmitter {
   async markRepotted(id) {
     try {
       await this.collectionService.markRepotted(id);
-      this.notifier.show("Отмечено: пересажено 🪴");
+      this.notifier.show("Отмечено: пересажено 🌱");
       await this.load();
     } catch (err) {
       console.error(err);

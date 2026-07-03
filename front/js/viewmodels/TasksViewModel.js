@@ -15,8 +15,8 @@ export class TasksViewModel extends EventEmitter {
       urgent: [], 
       tomorrow: [], 
       upcoming: [], 
-      completedToday: [],
-      completingKey: null,
+      completedToday: [], 
+      completingKey: null, 
     };
   }
 
@@ -66,7 +66,7 @@ export class TasksViewModel extends EventEmitter {
       } else {
         await this.collectionService.markRepotted(reminder.collectionId);
       }
-      this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🪴");
+      this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🌱");
 
       this.state = {
         ...this.state,

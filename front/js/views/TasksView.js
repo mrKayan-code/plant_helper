@@ -1,4 +1,5 @@
-const ACTION_ICON = { water: "💧", repot: "🪴" };
+
+const ACTION_ICON = { water: "💧", repot: "🌱" };
 const ACTION_LABEL = { water: "Полить", repot: "Пересадить" };
 
 export class TasksView {

@@ -107,7 +107,7 @@ export class CatalogView {
 
     const favBtn = card.querySelector(".card-favorite-btn");
     favBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); 
+      e.stopPropagation(); // не открывать деталку при клике на звёздочку
       this.vm.toggleFavorite(plant.id);
     });
 
@@ -178,7 +178,7 @@ export class CatalogView {
         { icon: "💧", label: "Полив", value: plant.watering },
         { icon: "☀️", label: "Освещение", value: plant.light },
       ],
-      repotting: [{ icon: "🪴", label: "Пересадка", value: plant.repotting }],
+      repotting: [{ icon: "🌱", label: "Пересадка", value: plant.repotting }],
       danger: [{ icon: "⚠️", label: "Ядовитость", value: plant.toxicity }],
     };
 
