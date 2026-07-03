@@ -155,9 +155,27 @@
 
     </section>
 
-    <!-- ЭКРАН: Мой сад (заглушка) -->
+    <!-- ЭКРАН: Мой сад -->
     <section class="screen" id="screen-garden">
-      <div class="stub"><span class="stub-leaf"></span><p>Мой сад — следующий шаг</p></div>
+      <div class="garden-header">
+        <h2 class="page-title" id="gardenTitle">Моя коллекция</h2>
+        <div class="garden-controls">
+          <div class="search-bar garden-search">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="text" id="gardenSearchInput" class="search-input" placeholder="Поиск по саду…" autocomplete="off">
+          </div>
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" id="gardenViewGridBtn" title="Плитки">▦</button>
+            <button class="view-toggle-btn" id="gardenViewListBtn" title="Список">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garden-grid" id="gardenContent">
+        <p class="empty-hint">Загрузка…</p>
+      </div>
+
+      <button class="btn-primary garden-add-btn" data-screen="catalog">+ Добавить растение</button>
     </section>
 
     <!-- ЭКРАН: Задачи (заглушка) -->
@@ -173,6 +191,39 @@
   </main>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Шторка редактирования растения из сада — выезжает снизу -->
+  <div class="edit-drawer-overlay" id="editDrawerOverlay" hidden></div>
+  <div class="edit-drawer" id="editDrawer">
+    <div class="edit-drawer-handle"></div>
+    <h3 class="edit-drawer-title">Редактировать «<span id="editPlantName"></span>»</h3>
+
+    <label class="field">
+      <span class="field-label">Заметка</span>
+      <textarea id="editNote" class="field-input field-textarea" rows="2" placeholder="Например: стоит на кухне"></textarea>
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span class="field-label">Полив, раз в N дней</span>
+        <input type="number" min="1" id="editWaterInterval" class="field-input">
+      </label>
+      <label class="field">
+        <span class="field-label">Пересадка, раз в N дней</span>
+        <input type="number" min="1" id="editRepotInterval" class="field-input">
+      </label>
+    </div>
+
+    <label class="field-checkbox">
+      <input type="checkbox" id="editFavorite">
+      <span>В избранном</span>
+    </label>
+
+    <div class="edit-drawer-actions">
+      <button class="btn-secondary" id="editCancelBtn">Отмена</button>
+      <button class="btn-primary" id="editSaveBtn">Сохранить</button>
+    </div>
+  </div>
 
   <script type="module" src="js/app.js"></script>
 </body>

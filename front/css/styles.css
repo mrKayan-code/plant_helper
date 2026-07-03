@@ -691,6 +691,191 @@ button:focus-visible {
   color: var(--color-text-muted);
 }
 
+/* ==========================================================
+   МОЙ САД
+   ========================================================== */
+.garden-header { margin-bottom: var(--space-5); }
+
+.garden-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.garden-search { flex: 1; max-width: 400px; margin: 0; }
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.view-toggle-btn {
+  padding: var(--space-2) var(--space-3);
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+.view-toggle-btn.active { background: var(--color-moss-600); color: #fff; }
+
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.garden-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.garden-card-img-wrap { position: relative; }
+.garden-card-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-surface-sunken);
+  display: block;
+}
+.garden-card-body { padding: var(--space-3) var(--space-4) var(--space-4); }
+.garden-card-name { font-weight: 600; font-size: 1rem; }
+.garden-card-note {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 2px 0 var(--space-2);
+}
+
+.garden-badges { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-bottom: var(--space-3); }
+.garden-badge {
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.garden-badge--ok { background: var(--color-moss-100); color: var(--color-moss-700); }
+.garden-badge--muted { background: var(--color-surface-sunken); color: var(--color-text-muted); font-style: italic; }
+.garden-badge--urgent { background: var(--color-clay-100); color: var(--color-clay-600); font-weight: 600; }
+.garden-badge--soon { background: var(--color-surface-sunken); color: var(--color-text-muted); }
+
+.garden-actions { display: flex; gap: var(--space-1); }
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+.icon-btn:hover { background: var(--color-border); }
+.icon-btn--danger:hover { background: var(--color-clay-100); }
+
+.garden-add-btn { margin-top: var(--space-2); }
+
+.garden-list { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-5); }
+.garden-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-card);
+}
+.garden-row-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--color-surface-sunken);
+  flex-shrink: 0;
+}
+.garden-row-info { flex: 1; min-width: 0; }
+.garden-row-top { display: flex; align-items: center; gap: var(--space-2); }
+.garden-row-name { font-weight: 600; }
+.garden-row-fav { color: var(--color-clay-600); }
+.garden-row-note {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 2px 0 var(--space-2);
+}
+
+/* ==========================================================
+   ШТОРКА РЕДАКТИРОВАНИЯ (выезжает снизу)
+   ========================================================== */
+.edit-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 46, 34, 0.45);
+  z-index: 55;
+}
+.edit-drawer-overlay[hidden] { display: none; }
+
+.edit-drawer {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 100%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--space-5);
+  box-shadow: 0 -4px 24px rgba(31, 46, 34, 0.15);
+  z-index: 56;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.edit-drawer.open { transform: translate(-50%, 0); }
+
+.edit-drawer-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: 0 auto var(--space-4);
+}
+
+.edit-drawer-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: var(--space-4);
+}
+
+.field-row { display: flex; gap: var(--space-3); }
+.field-row .field { flex: 1; }
+
+.field-textarea { resize: vertical; font-family: inherit; }
+
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.92rem;
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.edit-drawer-actions { display: flex; gap: var(--space-3); }
+.edit-drawer-actions .btn-primary,
+.edit-drawer-actions .btn-secondary { flex: 1; text-align: center; }
+
+.btn-secondary {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+.btn-secondary:hover { background: var(--color-border); }
+
 /* --- Toast --- */
 .toast {
   position: fixed;
