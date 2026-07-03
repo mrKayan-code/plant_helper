@@ -1,25 +1,36 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 
+// ViewModel энциклопедии. Справочник (plants) — read-only, тянется из
+// plantsService. Избранное и добавление в сад — через сторы (единый
+// источник правды), поэтому звёздочки всегда синхронны с "Мой сад",
+// а добавленное растение сразу появляется в саду без ручных перезагрузок.
 export class CatalogViewModel extends EventEmitter {
-  constructor(plantsService, favoritesService, collectionService, notifier) {
+  constructor(plantsService, favoritesStore, collectionStore, notifier) {
     super();
     this.plantsService = plantsService;
-    this.favoritesService = favoritesService;
-    this.collectionService = collectionService;
+    this.favoritesStore = favoritesStore;
+    this.collectionStore = collectionStore;
     this.notifier = notifier;
 
     this.state = {
-      mode: "list", 
-      viewFilter: "all", 
+      mode: "list",
+      viewFilter: "all",
       loading: true,
       error: null,
       plants: [],
       query: "",
-      favoriteIds: new Set(),
+      favoriteIds: new Set(this.favoritesStore.ids),
       selectedPlant: null,
       addingToGarden: false,
       addedToGarden: false,
     };
+
+    // Избранное приходит из стора — подписка держит звёздочки актуальными
+    // (в т.ч. если избранное поменяли в "Мой сад" или сменили аккаунт).
+    this.favoritesStore.on("change", (ids) => {
+      this.state = { ...this.state, favoriteIds: new Set(ids) };
+      this.emit("change", this.state);
+    });
   }
 
   async init() {
@@ -27,19 +38,13 @@ export class CatalogViewModel extends EventEmitter {
     await this.search(this.state.query);
   }
 
-  // Перезагрузка только избранного — дёшево (один GET /favorites).
-  // Вызывается при показе экрана и при смене аккаунта, чтобы звёздочки
-  // отражали актуальное состояние текущего пользователя, а не протухшее.
+  // Делегирует стору; оставлен, чтобы CatalogView.onShow не менять.
   async reloadFavorites() {
     try {
-      const favorites = await this.favoritesService.getAll();
-      this.state.favoriteIds = new Set(favorites.map((p) => p.id));
+      await this.favoritesStore.load();
     } catch (err) {
-      // не залогинен / ошибка — очищаем, чтобы не показывать чужое избранное
-      this.state.favoriteIds = new Set();
       console.error("Не удалось загрузить избранное:", err);
     }
-    this.emit("change", this.state);
   }
 
   async search(query) {
@@ -91,19 +96,11 @@ export class CatalogViewModel extends EventEmitter {
   async toggleFavorite(plantId) {
     const isFav = this.isFavorite(plantId);
     try {
-      if (isFav) {
-        await this.favoritesService.remove(plantId);
-        this.state.favoriteIds.delete(plantId);
-        this.notifier.show("Убрано из избранного");
-      } else {
-        await this.favoritesService.add(plantId);
-        this.state.favoriteIds.add(plantId);
-        this.notifier.show("Добавлено в избранное");
-      }
+      await this.favoritesStore.toggle(plantId); // стор сам разошлёт "change"
+      this.notifier.show(isFav ? "Убрано из избранного" : "Добавлено в избранное");
     } catch (err) {
       console.error(err);
     }
-    this.emit("change", this.state);
   }
 
   async addSelectedToGarden() {
@@ -114,7 +111,7 @@ export class CatalogViewModel extends EventEmitter {
     this.emit("change", this.state);
 
     try {
-      await this.collectionService.add({ plantId: plant.id });
+      await this.collectionStore.add({ plantId: plant.id }); // появится в "Мой сад" автоматически
       this.state.addedToGarden = true;
       this.notifier.show(`«${plant.name}» добавлено в мой сад`);
     } catch (err) {

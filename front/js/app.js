@@ -24,39 +24,46 @@ container.onUnauthorized = () => authViewModel.logout();
 new AccountView(authViewModel);
 authViewModel.init();
 
-const homeViewModel = new HomeViewModel(container.collectionService, container.remindersService);
+const homeViewModel = new HomeViewModel(container.collectionStore, container.remindersStore);
 router.register("home", new HomeView(homeViewModel));
 
 const catalogViewModel = new CatalogViewModel(
   container.plantsService,
-  container.favoritesService,
-  container.collectionService,
+  container.favoritesStore,
+  container.collectionStore,
   container.notifier
 );
 router.register("catalog", new CatalogView(catalogViewModel));
 
 const gardenViewModel = new GardenViewModel(
-  container.collectionService,
-  container.favoritesService,
+  container.collectionStore,
+  container.favoritesStore,
   container.notifier
 );
 router.register("garden", new GardenView(gardenViewModel));
 
 const tasksViewModel = new TasksViewModel(
-  container.remindersService,
-  container.collectionService,
+  container.collectionStore,
+  container.remindersStore,
   container.notifier
 );
 router.register("tasks", new TasksView(tasksViewModel));
 
+// Смена аккаунта: грузим/чистим ТОЛЬКО сторы — все экраны подписаны на них
+// и обновятся сами. Ничего не забудешь дописать при добавлении экрана.
 let wasAuthenticated = authViewModel.state.isAuthenticated;
 authViewModel.on("change", (state) => {
-  if (state.isAuthenticated !== wasAuthenticated) {
-    wasAuthenticated = state.isAuthenticated;
-    homeViewModel.load();
-    gardenViewModel.load();
-    tasksViewModel.load();
-    catalogViewModel.reloadFavorites(); // ← избранное в энциклопедии тоже принадлежит аккаунту
+  if (state.isAuthenticated === wasAuthenticated) return;
+  wasAuthenticated = state.isAuthenticated;
+
+  if (state.isAuthenticated) {
+    container.collectionStore.load().catch(() => {});
+    container.favoritesStore.load().catch(() => {});
+    container.remindersStore.load().catch(() => {});
+  } else {
+    container.collectionStore.clear();
+    container.favoritesStore.clear();
+    container.remindersStore.clear();
   }
 });
 

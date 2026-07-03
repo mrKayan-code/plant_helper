@@ -1,23 +1,29 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 import { todayISO, addDaysISO } from "../utils/dateUtils.js";
 
+// ViewModel экрана "Задачи". Задачи читает из remindersStore, отметки
+// "полито/пересажено" делает через collectionStore. Полил → коллекция
+// изменилась → remindersStore сам перечитался → задачи пересчитались.
+// "Выполнено сегодня" — сессионный список на фронте (бэк историю не хранит).
 export class TasksViewModel extends EventEmitter {
-  constructor(remindersService, collectionService, notifier) {
+  constructor(collectionStore, remindersStore, notifier) {
     super();
-    this.remindersService = remindersService;
-    this.collectionService = collectionService;
+    this.collectionStore = collectionStore;
+    this.remindersStore = remindersStore;
     this.notifier = notifier;
 
     this.state = {
-      filter: "all", 
+      filter: "all", // "today" | "tomorrow" | "all"
       loading: true,
       error: null,
-      urgent: [], 
-      tomorrow: [], 
-      upcoming: [], 
-      completedToday: [], 
-      completingKey: null, 
+      urgent: [],
+      tomorrow: [],
+      upcoming: [],
+      completedToday: [],
+      completingKey: null,
     };
+
+    this.remindersStore.on("change", () => this.recompute());
   }
 
   async load() {
@@ -25,28 +31,33 @@ export class TasksViewModel extends EventEmitter {
     this.emit("change", this.state);
 
     try {
-      const reminders = await this.remindersService.getAll();
-      const today = todayISO();
-      const tomorrow = addDaysISO(today, 1);
-
-      const completedKeys = new Set(this.state.completedToday.map((c) => c.key));
-      const notCompleted = (r) => !completedKeys.has(`${r.collectionId}:${r.action}`);
-
-      this.state = {
-        ...this.state,
-        loading: false,
-        urgent: reminders.filter((r) => r.dueDate <= today && notCompleted(r)),
-        tomorrow: reminders.filter((r) => r.dueDate === tomorrow && notCompleted(r)),
-        upcoming: reminders.filter((r) => r.dueDate > today && notCompleted(r)),
-      };
+      await this.remindersStore.load(); // разошлёт "change" → recompute()
     } catch (err) {
       const message = err.message === "Unauthorized"
         ? "Войдите, чтобы увидеть задачи"
         : "Не удалось загрузить задачи";
       this.state = { ...this.state, loading: false, error: message };
+      this.emit("change", this.state);
       console.error(err);
     }
+  }
 
+  recompute() {
+    const reminders = this.remindersStore.items;
+    const today = todayISO();
+    const tomorrow = addDaysISO(today, 1);
+
+    const completedKeys = new Set(this.state.completedToday.map((c) => c.key));
+    const notCompleted = (r) => !completedKeys.has(`${r.collectionId}:${r.action}`);
+
+    this.state = {
+      ...this.state,
+      loading: false,
+      error: null,
+      urgent: reminders.filter((r) => r.dueDate <= today && notCompleted(r)),
+      tomorrow: reminders.filter((r) => r.dueDate === tomorrow && notCompleted(r)),
+      upcoming: reminders.filter((r) => r.dueDate > today && notCompleted(r)),
+    };
     this.emit("change", this.state);
   }
 
@@ -62,17 +73,18 @@ export class TasksViewModel extends EventEmitter {
 
     try {
       if (reminder.action === "water") {
-        await this.collectionService.markWatered(reminder.collectionId);
+        await this.collectionStore.markWatered(reminder.collectionId);
       } else {
-        await this.collectionService.markRepotted(reminder.collectionId);
+        await this.collectionStore.markRepotted(reminder.collectionId);
       }
+      // collectionStore → remindersStore перечитались; фиксируем "выполнено" и пересчитываем
       this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🌱");
-
       this.state = {
         ...this.state,
+        completingKey: null,
         completedToday: [...this.state.completedToday, { key, name: reminder.name, action: reminder.action }],
       };
-      await this.load();
+      this.recompute();
     } catch (err) {
       console.error(err);
       this.state = { ...this.state, completingKey: null };
