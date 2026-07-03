@@ -20,6 +20,7 @@
   th { background: #1c2733; position: sticky; top: 0; }
   input { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 3px 5px; font-size: 12px; width: 100%; min-width: 90px; }
   input:focus { border-color: #2ea043; outline: none; }
+  input::placeholder { color: #6ba46b; font-style: italic; }
   .btn { cursor: pointer; border: none; border-radius: 5px; padding: 4px 10px; font-size: 12px; color: #fff; }
   .save { background: #238636; } .del { background: #a1281f; }
   .btn:disabled { opacity: .4; cursor: default; }
@@ -74,14 +75,17 @@ async function loadTable(name) {
   renderGrid(data);
 }
 
-function renderGrid({ table, columns, rows, editable }) {
+function renderGrid({ table, columns, rows, editable, hints }) {
   const grid = document.getElementById("grid");
   const head = "<tr>" + columns.map(c => `<th>${c}</th>`).join("") + (editable ? "<th>действия</th>" : "") + "</tr>";
   const body = rows.map(row => {
     const cells = columns.map(c => {
       const val = row[c] == null ? "" : row[c];
       const readonly = c === "id" ? "readonly" : "";
-      return `<td><input data-col="${c}" value="${String(val).replace(/"/g, "&quot;")}" ${readonly}></td>`;
+      // Для collection: если графа интервала пустая — подсказываем дефолт из справочника
+      const hint = (val === "" && hints && hints[row.id] && hints[row.id][c] != null)
+        ? `placeholder="default = ${hints[row.id][c]}"` : "";
+      return `<td><input data-col="${c}" value="${String(val).replace(/"/g, "&quot;")}" ${readonly} ${hint}></td>`;
     }).join("");
     const actions = editable
       ? `<td><button class="btn save" onclick="saveRow(this, ${row.id})">Сохранить</button>

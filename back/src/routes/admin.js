@@ -34,7 +34,27 @@ router.get('/table/:name', ensureTable, (req, res) => {
   const columns = columnsOf(name);
   const rows = db.prepare(`SELECT * FROM ${name}`).all();
   const hasId = columns.includes('id'); // favorites без id (составной ключ) — только просмотр
-  res.json({ table: name, columns, rows, editable: hasId });
+  const payload = { table: name, columns, rows, editable: hasId };
+
+  // Для collection добавляем дефолты из справочника (эффективный интервал, когда графа пустая).
+  // hints: { <rowId>: { water_interval_days, repot_interval_days } }
+  if (name === 'collection') {
+    const defs = db.prepare(`
+      SELECT c.id AS id,
+             p.water_interval_days AS water_interval_days,
+             p.repot_interval_days AS repot_interval_days
+      FROM collection c JOIN plants p ON p.id = c.plant_id
+    `).all();
+    payload.hints = {};
+    for (const d of defs) {
+      payload.hints[d.id] = {
+        water_interval_days: d.water_interval_days,
+        repot_interval_days: d.repot_interval_days,
+      };
+    }
+  }
+
+  res.json(payload);
 });
 
 // Обновить строку по id (для collection/plants/users). Меняем только реальные колонки.
