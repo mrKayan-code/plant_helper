@@ -8,6 +8,8 @@ import collectionRouter from './routes/collection.js';
 import favoritesRouter from './routes/favorites.js';
 import remindersRouter from './routes/reminders.js';
 import adminRouter from './routes/admin.js';
+import pushRouter from './routes/push.js';
+import { initPush, startPushScheduler } from './push.service.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +33,7 @@ app.use('/api/plants', plantsRouter);       // справочник (публи�
 app.use('/api/collection', collectionRouter); // личный список (защищён)
 app.use('/api/favorites', favoritesRouter);   // избранное (защищён)
 app.use('/api/reminders', remindersRouter);   // напоминания (защищён)
+app.use('/api/push', pushRouter);             // подписка на web-push
 
 // --- админка (dev-only, включается ADMIN_ENABLED=true) ---
 if (process.env.ADMIN_ENABLED === 'true') {
@@ -56,6 +59,10 @@ app.use((err, req, res, next) => {
   console.error('Необработанная ошибка:', err);
   res.status(500).json({ error: 'Внутренняя ошибка сервера' });
 });
+
+// --- web-push: инициализация + фоновый планировщик ---
+initPush();
+startPushScheduler();
 
 app.listen(PORT, () => {
   console.log(`Plant Helper API запущен: http://localhost:${PORT}`);

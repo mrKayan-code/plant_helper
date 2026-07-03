@@ -56,9 +56,29 @@ db.exec(`
     FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE CASCADE
   );
 
+  -- Подписки на web-push (одна на устройство/браузер)
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    endpoint     TEXT NOT NULL UNIQUE,   -- уникальный URL пуш-сервиса
+    subscription TEXT NOT NULL,          -- полный объект подписки (JSON)
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  -- Журнал отправленных пушей (чтобы не слать одно и то же повторно)
+  CREATE TABLE IF NOT EXISTS push_log (
+    user_id      INTEGER NOT NULL,
+    reminder_key TEXT NOT NULL,          -- collectionId:action:dueDate
+    sent_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (user_id, reminder_key),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
   -- Индексы под частые выборки "данные текущего пользователя"
   CREATE INDEX IF NOT EXISTS idx_collection_user ON collection(user_id);
   CREATE INDEX IF NOT EXISTS idx_favorites_user  ON favorites(user_id);
+  CREATE INDEX IF NOT EXISTS idx_push_subs_user  ON push_subscriptions(user_id);
 `);
 
 // --- Seed/sync справочника: upsert по slug при каждом старте ---

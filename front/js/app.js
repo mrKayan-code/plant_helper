@@ -14,6 +14,7 @@ import { CatalogView } from "./views/CatalogView.js";
 import { GardenView } from "./views/GardenView.js";
 import { TasksView } from "./views/TasksView.js";
 import { CareConfirmView } from "./views/CareConfirmView.js";
+import { PushService } from "./services/PushService.js";
 
 
 const container = new ServiceContainer();
@@ -25,6 +26,18 @@ container.onUnauthorized = () => authViewModel.logout();
 
 new AccountView(authViewModel);
 authViewModel.init();
+
+// Кнопка "Включить уведомления" в модалке аккаунта (нужен жест пользователя).
+const pushService = new PushService(container.http);
+document.getElementById("enableNotifBtn")?.addEventListener("click", async () => {
+  try {
+    await pushService.enable();
+    container.notifier.show("Уведомления включены 🔔");
+  } catch (err) {
+    container.notifier.show(err.message || "Не удалось включить уведомления");
+    console.error(err);
+  }
+});
 
 const careConfirmViewModel = new CareConfirmViewModel(container.collectionStore, container.notifier);
 new CareConfirmView(careConfirmViewModel);

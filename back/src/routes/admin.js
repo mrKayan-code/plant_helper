@@ -6,7 +6,7 @@ import { db } from '../db.js';
 const router = Router();
 
 // Белый список таблиц — имена таблиц нельзя параметризовать, поэтому строго проверяем.
-const TABLES = ['users', 'plants', 'collection', 'favorites'];
+const TABLES = ['users', 'plants', 'collection', 'favorites', 'push_subscriptions', 'push_log'];
 
 function columnsOf(table) {
   return db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
