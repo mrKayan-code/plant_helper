@@ -475,19 +475,6 @@ button:focus-visible {
   text-overflow: ellipsis;
 }
 
-/* --- Заглушки нереализованных экранов --- */
-.stub {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  min-height: 60vh;
-  color: var(--color-text-muted);
-  text-align: center;
-}
-.stub-leaf { font-size: 3rem; }
-
 /* ==========================================================
    ЭНЦИКЛОПЕДИЯ
    ========================================================== */
@@ -692,6 +679,44 @@ button:focus-visible {
 }
 
 /* ==========================================================
+   ЗАДАЧИ
+   ========================================================== */
+.tasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.filter-chips { display: flex; gap: var(--space-2); }
+.filter-chip {
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  transition: background 0.15s ease;
+}
+.filter-chip:hover:not(.active) { background: var(--color-surface-sunken); }
+.filter-chip.active { background: var(--color-moss-600); border-color: var(--color-moss-600); color: #fff; }
+
+.task-row--checkable { cursor: pointer; }
+.task-checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--color-moss-600);
+  cursor: pointer;
+}
+
+.task-row--done { opacity: 0.6; }
+.task-row--done .task-plant-name { text-decoration: line-through; }
+
+/* ==========================================================
    МОЙ САД
    ========================================================== */
 .garden-header { margin-bottom: var(--space-5); }
@@ -758,9 +783,9 @@ button:focus-visible {
   white-space: nowrap;
 }
 .garden-badge--ok { background: var(--color-moss-100); color: var(--color-moss-700); }
-.garden-badge--muted { background: var(--color-surface-sunken); color: var(--color-text-muted); font-style: italic; }
 .garden-badge--urgent { background: var(--color-clay-100); color: var(--color-clay-600); font-weight: 600; }
 .garden-badge--soon { background: var(--color-surface-sunken); color: var(--color-text-muted); }
+.garden-badge--muted { background: var(--color-surface-sunken); color: var(--color-text-muted); font-style: italic; }
 
 .garden-actions { display: flex; gap: var(--space-1); }
 .icon-btn {

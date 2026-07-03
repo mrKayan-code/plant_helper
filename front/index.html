@@ -14,15 +14,14 @@
   <!-- Постоянная боковая панель (не выезжающая — десктоп, мобильная версия не нужна) -->
   <nav class="sidebar" aria-label="Основная навигация">
     <div class="sidebar-header">
-      <span class="sidebar-leaf" aria-hidden="true"></span>
+      <span class="sidebar-leaf" aria-hidden="true">🌿</span>
       <span class="sidebar-title">Мой зелёный<br>уголок</span>
     </div>
     <ul class="sidebar-nav">
-      <li><button class="sidebar-link active" data-screen="home"><span class="sidebar-icon"></span>Главная</button></li>
-      <li><button class="sidebar-link" data-screen="catalog"><span class="sidebar-icon"></span>Энциклопедия</button></li>
-      <li><button class="sidebar-link" data-screen="garden"><span class="sidebar-icon"></span>Мой сад</button></li>
-      <li><button class="sidebar-link" data-screen="tasks"><span class="sidebar-icon"></span>Задачи</button></li>
-      <li><button class="sidebar-link" data-screen="settings"><span class="sidebar-icon"></span>Настройки</button></li>
+      <li><button class="sidebar-link active" data-screen="home"><span class="sidebar-icon">🏠</span>Главная</button></li>
+      <li><button class="sidebar-link" data-screen="catalog"><span class="sidebar-icon">📖</span>Энциклопедия</button></li>
+      <li><button class="sidebar-link" data-screen="garden"><span class="sidebar-icon">🪴</span>Мой сад</button></li>
+      <li><button class="sidebar-link" data-screen="tasks"><span class="sidebar-icon">✅</span>Задачи</button></li>
     </ul>
   </nav>
 
@@ -40,7 +39,7 @@
       <!-- Показывается, если НЕ авторизован -->
       <div id="authFormBlock">
         <div class="auth-brand">
-          <span class="auth-leaf" aria-hidden="true"></span>
+          <span class="auth-leaf" aria-hidden="true">🌿</span>
           <h2 class="auth-title">Мой зелёный уголок</h2>
         </div>
         <p class="auth-subtitle" id="authSubtitle">Войдите, чтобы продолжить</p>
@@ -64,7 +63,7 @@
       <!-- Показывается, если авторизован -->
       <div id="accountInfoBlock" hidden>
         <div class="auth-brand">
-          <span class="auth-leaf" aria-hidden="true"></span>
+          <span class="auth-leaf" aria-hidden="true">🌿</span>
           <h2 class="auth-title">Аккаунт</h2>
         </div>
         <p class="account-email" id="accountEmail"></p>
@@ -128,7 +127,7 @@
         <div class="catalog-header">
           <h2 class="page-title">Энциклопедия растений</h2>
           <div class="search-bar">
-            <span class="search-icon" aria-hidden="true"></span>
+            <span class="search-icon" aria-hidden="true">🔍</span>
             <input
               type="text"
               id="catalogSearchInput"
@@ -178,14 +177,31 @@
       <button class="btn-primary garden-add-btn" data-screen="catalog">+ Добавить растение</button>
     </section>
 
-    <!-- ЭКРАН: Задачи (заглушка) -->
+    <!-- ЭКРАН: Задачи -->
     <section class="screen" id="screen-tasks">
-      <div class="stub"><span class="stub-leaf"></span><p>Задачи — следующий шаг</p></div>
-    </section>
+      <div class="tasks-header">
+        <h2 class="page-title">Задачи</h2>
+        <div class="filter-chips" id="tasksFilters">
+          <button class="filter-chip" data-filter="today">Сегодня</button>
+          <button class="filter-chip" data-filter="tomorrow">Завтра</button>
+          <button class="filter-chip active" data-filter="all">Все</button>
+        </div>
+      </div>
 
-    <!-- ЭКРАН: Настройки (заглушка) -->
-    <section class="screen" id="screen-settings">
-      <div class="stub"><span class="stub-leaf"></span><p>Настройки — следующий шаг</p></div>
+      <section class="block" id="tasksUrgentSection">
+        <h3 class="block-title block-title--urgent">Срочно</h3>
+        <div class="task-list" id="tasksUrgentList"></div>
+      </section>
+
+      <section class="block" id="tasksUpcomingSection">
+        <h3 class="block-title">Скоро</h3>
+        <div class="task-list" id="tasksUpcomingList"></div>
+      </section>
+
+      <section class="block" id="tasksCompletedSection" hidden>
+        <h3 class="block-title">Выполнено сегодня</h3>
+        <div class="task-list" id="tasksCompletedList"></div>
+      </section>
     </section>
 
   </main>
@@ -205,12 +221,14 @@
 
     <div class="field-row">
       <label class="field">
-        <span class="field-label">Полив, раз в N дней</span>
+        <span class="field-label">Интервал полива, дней</span>
         <input type="number" min="1" id="editWaterInterval" class="field-input">
+        <span class="field-hint" id="editWaterHint"></span>
       </label>
       <label class="field">
-        <span class="field-label">Пересадка, раз в N дней</span>
+        <span class="field-label">Интервал пересадки, дней</span>
         <input type="number" min="1" id="editRepotInterval" class="field-input">
+        <span class="field-hint" id="editRepotHint"></span>
       </label>
     </div>
 

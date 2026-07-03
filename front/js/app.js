@@ -6,11 +6,13 @@ import { AuthViewModel } from "./viewmodels/AuthViewModel.js";
 import { HomeViewModel } from "./viewmodels/HomeViewModel.js";
 import { CatalogViewModel } from "./viewmodels/CatalogViewModel.js";
 import { GardenViewModel } from "./viewmodels/GardenViewModel.js";
+import { TasksViewModel } from "./viewmodels/TasksViewModel.js";
 
 import { AccountView } from "./views/AccountView.js";
 import { HomeView } from "./views/HomeView.js";
 import { CatalogView } from "./views/CatalogView.js";
 import { GardenView } from "./views/GardenView.js";
+import { TasksView } from "./views/TasksView.js";
 
 // Composition root: единственное место во всём приложении, где создаются
 // конкретные объекты и связываются друг с другом через конструкторы.
@@ -49,18 +51,26 @@ const gardenViewModel = new GardenViewModel(
 );
 router.register("garden", new GardenView(gardenViewModel));
 
-// HomeViewModel/GardenViewModel обновляются только при показе своего экрана
-// (onShow). Если человек уже находится на одном из них и логинится/
-// разлогинивается через модалку — экран сам об этом не узнает. Поэтому
-// дополнительно перезагружаем данные при каждой смене статуса авторизации
-// (но не при каждом открытии/закрытии модалки — для этого сравниваем
-// с предыдущим значением isAuthenticated).
+const tasksViewModel = new TasksViewModel(
+  container.remindersService,
+  container.collectionService,
+  container.notifier
+);
+router.register("tasks", new TasksView(tasksViewModel));
+
+// HomeViewModel/GardenViewModel/TasksViewModel обновляются только при
+// показе своего экрана (onShow). Если человек уже находится на одном из
+// них и логинится/разлогинивается через модалку — экран сам об этом не
+// узнает. Поэтому дополнительно перезагружаем данные при каждой смене
+// статуса авторизации (но не при каждом открытии/закрытии модалки — для
+// этого сравниваем с предыдущим значением isAuthenticated).
 let wasAuthenticated = authViewModel.state.isAuthenticated;
 authViewModel.on("change", (state) => {
   if (state.isAuthenticated !== wasAuthenticated) {
     wasAuthenticated = state.isAuthenticated;
     homeViewModel.load();
     gardenViewModel.load();
+    tasksViewModel.load();
   }
 });
 
