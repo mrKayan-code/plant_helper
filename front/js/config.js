@@ -4,7 +4,7 @@ export const config = {
   useMocks: {
     auth: false,
     collection: false,
-    favorites: true,
+    favorites: false,
     reminders: false,
   },
 

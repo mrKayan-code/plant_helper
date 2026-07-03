@@ -23,13 +23,23 @@ export class CatalogViewModel extends EventEmitter {
   }
 
   async init() {
+    await this.reloadFavorites();
+    await this.search(this.state.query);
+  }
+
+  // Перезагрузка только избранного — дёшево (один GET /favorites).
+  // Вызывается при показе экрана и при смене аккаунта, чтобы звёздочки
+  // отражали актуальное состояние текущего пользователя, а не протухшее.
+  async reloadFavorites() {
     try {
       const favorites = await this.favoritesService.getAll();
       this.state.favoriteIds = new Set(favorites.map((p) => p.id));
     } catch (err) {
+      // не залогинен / ошибка — очищаем, чтобы не показывать чужое избранное
+      this.state.favoriteIds = new Set();
       console.error("Не удалось загрузить избранное:", err);
     }
-    await this.search(this.state.query);
+    this.emit("change", this.state);
   }
 
   async search(query) {

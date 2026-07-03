@@ -39,6 +39,10 @@ export class CatalogView {
   onShow() {
     if (this.vm.state.plants.length === 0 && !this.vm.state.error) {
       this.vm.init();
+    } else {
+      // справочник уже загружен — обновляем только избранное (могло измениться
+      // в «Мой сад» или при смене аккаунта)
+      this.vm.reloadFavorites();
     }
   }
 

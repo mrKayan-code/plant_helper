@@ -166,6 +166,14 @@ db.js                — соединение с SQLite + схема + seed (sin
   Теперь `201` + карточка растения (консистентно с `POST /collection`). Фронт может
   вернуть `favorites` на реальный API. У фронта та же 0-проверка в GardenViewModel — см. FIX-reminders.md.
 
+## Админка + диагностика (dev-tools) ✅
+- `routes/admin.js` + `public/admin.html` → `/admin` (флаг `ADMIN_ENABLED=true`).
+  Просмотр/правка таблиц, менять `last_watered_at` задним числом для проверки напоминаний.
+  Без авторизации — только dev. API: `/api/admin/tables`, `/api/admin/table/:name` (GET/PATCH/DELETE).
+- `DB_PATH` env — переопределение файла БД (изолированные тесты, не трогаем рабочую базу).
+- Проверено: БД персистентна между рестартами (аккаунты НЕ слетают); favorites — по аккаунтам, в БД.
+  «Странность» избранного была из-за `favorites: true` (мок) в front/config.js — переключено на false.
+
 ## Заметки / решения по ходу
 <!-- сюда пишем нестандартные решения, костыли, договорённости -->
 - node:sqlite синхронный (DatabaseSync) — async/await для БД не нужен.

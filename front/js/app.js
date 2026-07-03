@@ -56,6 +56,7 @@ authViewModel.on("change", (state) => {
     homeViewModel.load();
     gardenViewModel.load();
     tasksViewModel.load();
+    catalogViewModel.reloadFavorites(); // ← избранное в энциклопедии тоже принадлежит аккаунту
   }
 });
 
