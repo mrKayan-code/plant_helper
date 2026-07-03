@@ -22,6 +22,7 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS plants (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug                TEXT UNIQUE,        -- стабильный ключ (напр. "rose") — по нему upsert
     name                TEXT NOT NULL,      -- название
     watering            TEXT,               -- рекомендации по поливу
     light               TEXT,               -- рекомендации по освещению
@@ -60,32 +61,52 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_favorites_user  ON favorites(user_id);
 `);
 
-// --- Seed справочника: заливаем, только если таблица plants пустая ---
-const { count } = db.prepare('SELECT COUNT(*) AS count FROM plants').get();
-if (count === 0) {
+// --- Seed/sync справочника: upsert по slug при каждом старте ---
+// Идентичность растения — slug (не автоинкремент id), поэтому пересев НЕ ломает
+// ссылки collection.plant_id (id существующей строки сохраняется при обновлении).
+// Так 3-й тим может регенерировать plants.json сколько угодно — данные обновятся
+// без сноса БД и без потери коллекций пользователей.
+const ASSET_BASE_URL = process.env.ASSET_BASE_URL || 'http://localhost:3000';
+
+// Относительный путь картинки → абсолютный URL на бэк (который раздаёт /assets).
+function toImageUrl(raw) {
+  if (!raw) return null;
+  if (/^https?:\/\//.test(raw)) return raw;              // уже абсолютный — не трогаем
+  return `${ASSET_BASE_URL}/${raw.replace(/^\//, '')}`;
+}
+
+{
   const seedPath = join(import.meta.dirname, '..', 'data', 'plants.json');
   const plants = JSON.parse(readFileSync(seedPath, 'utf8'));
 
-  const insert = db.prepare(`
+  const upsert = db.prepare(`
     INSERT INTO plants
-      (name, watering, light, repotting, toxicity, notes,
+      (slug, name, watering, light, repotting, toxicity, notes,
        water_interval_days, repot_interval_days, image_url)
-    VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(slug) DO UPDATE SET
+      name = excluded.name,
+      watering = excluded.watering,
+      light = excluded.light,
+      repotting = excluded.repotting,
+      toxicity = excluded.toxicity,
+      notes = excluded.notes,
+      water_interval_days = excluded.water_interval_days,
+      repot_interval_days = excluded.repot_interval_days,
+      image_url = excluded.image_url
   `);
 
-  // Транзакция: все вставки разом, быстрее и атомарно
   db.exec('BEGIN');
   for (const p of plants) {
-    insert.run(
-      p.name, p.watering ?? null, p.light ?? null, p.repotting ?? null,
+    upsert.run(
+      p.slug, p.name, p.watering ?? null, p.light ?? null, p.repotting ?? null,
       p.toxicity ?? null, p.notes ?? null,
-      p.waterIntervalDays ?? null, p.repotIntervalDays ?? null, p.imageUrl ?? null,
+      p.waterIntervalDays ?? null, p.repotIntervalDays ?? null, toImageUrl(p.imageUrl),
     );
   }
   db.exec('COMMIT');
 
-  console.log(`Справочник заполнен: ${plants.length} растений`);
+  console.log(`Справочник синхронизирован: ${plants.length} растений (upsert по slug)`);
 }
 
 console.log('БД инициализирована:', DB_PATH);

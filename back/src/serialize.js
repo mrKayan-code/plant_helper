@@ -12,6 +12,7 @@ export function serializePlant(row) {
   if (!row) return null;
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     watering: row.watering,
     light: row.light,

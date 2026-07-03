@@ -16,6 +16,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// --- статика картинок справочника («полусервер»: не отдельное хранилище,
+// но и не свалка на фронте — бэк раздаёт assets, imageUrl указывает сюда) ---
+app.use('/assets', express.static(join(import.meta.dirname, '..', '..', 'assets')));
+
 // --- health-check (Шаг 1) ---
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
