@@ -7,6 +7,29 @@
 
 ---
 
+## Архитектура (слои)
+
+Слоёная, каждый слой знает только про соседний снизу:
+
+```
+routes/*.js          — HTTP-слой: разбор запроса, валидация, коды ответов. SQL НЕ содержит.
+   │
+repositories/*.js    — доступ к данным: весь SQL живёт здесь (plantsRepo, usersRepo, ...)
+   │
+db.js                — соединение с SQLite + схема + seed (singleton `db`)
+
+вспомогательные (сквозные):
+  auth.js       — хеш пароля (scrypt) + JWT. Чистые функции.
+  serialize.js  — строка БД (snake_case) → объект API (camelCase). Прячет формат.
+  middleware/   — requireAuth и пр.
+```
+
+**Зачем так:** роут не знает про SQL, репозиторий не знает про HTTP — это чинит SRP и DIP.
+Поменять запрос — правим только репозиторий. Поменять формат ответа — только `serialize.js`.
+Правило: **новый роут не пишет SQL напрямую — только через `*.repo.js`.**
+
+---
+
 ## Шаг 0 — Инициализация проекта ✅
 - [x] `package.json`: `"type": "module"`, start = `node --watch --env-file=.env src/server.js`
 - [x] `yarn add express cors jsonwebtoken` (Express 5)

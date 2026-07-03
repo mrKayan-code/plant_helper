@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db.js';
+import { usersRepo } from '../repositories/users.repo.js';
 import { hashPassword, verifyPassword, signToken } from '../auth.js';
 import { serializeUser } from '../serialize.js';
 
@@ -22,16 +22,11 @@ router.post('/register', (req, res) => {
     return res.status(400).json({ error: 'Пароль минимум 6 символов' });
   }
 
-  const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-  if (exists) {
+  if (usersRepo.findByEmail(email)) {
     return res.status(409).json({ error: 'Email уже занят' });
   }
 
-  const info = db
-    .prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)')
-    .run(email, hashPassword(password));
-
-  const user = { id: info.lastInsertRowid, email };
+  const user = usersRepo.create(email, hashPassword(password));
   res.status(201).json({ token: signToken(user.id), user: serializeUser(user) });
 });
 
@@ -43,7 +38,7 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Нужны email и пароль' });
   }
 
-  const row = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const row = usersRepo.findByEmail(email);
   // Одинаковый ответ и при отсутствии юзера, и при неверном пароле — не палим, есть ли email
   if (!row || !verifyPassword(password, row.password_hash)) {
     return res.status(401).json({ error: 'Неверный email или пароль' });
