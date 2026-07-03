@@ -92,7 +92,8 @@ plants (
   repotting TEXT,         -- информация о пересадке
   toxicity TEXT,          -- ядовитость
   notes TEXT,             -- доп. особенности
-  water_interval_days INT,-- для напоминаний: как часто поливать
+  water_interval_days INT,-- для напоминаний: как часто поливать (дни)
+  repot_interval_days INT,-- для напоминаний: как часто пересаживать (дни)
   image_url TEXT
 )
 
@@ -103,7 +104,8 @@ collection (
   plant_id INTEGER FK -> plants.id,  -- ссылка на карточку справочника
   added_at TEXT,                     -- дата добавления
   note TEXT,                         -- заметки пользователя
-  water_interval_days INT,           -- переопределение интервала
+  water_interval_days INT,           -- переопределение интервала полива (иначе берём из plants)
+  repot_interval_days INT,           -- переопределение интервала пересадки (иначе из plants)
   last_watered_at TEXT,
   last_repotted_at TEXT
 )
@@ -116,38 +118,142 @@ favorites (
 )
 ```
 
-Напоминания в базовой версии — **вычисляемые** (не отдельная таблица):
-`due = last_watered_at + water_interval_days <= сегодня`. Считаем на лету в эндпоинте.
+Напоминания в базовой версии — **вычисляемые** (не отдельная таблица), считаем на лету:
+- полив: `due = last_watered_at + effective_water_interval <= сегодня`
+- пересадка: `due = last_repotted_at + effective_repot_interval <= сегодня`
+
+`effective_*_interval` = значение из `collection` (если задано пользователем), иначе из `plants`.
+Если интервал не задан нигде или дата (`last_*`) пустая — по этому действию напоминание **не создаётся** (нельзя посчитать).
 
 ---
 
 ## API-контракт (для фронта)
 
-Заголовок во всех защищённых запросах: `Authorization: Bearer <JWT>`
+Базовый URL: `http://localhost:3000/api`. Заголовок во всех **защищённых** запросах:
+`Authorization: Bearer <JWT>`. Все тела запросов/ответов — JSON. Поля — `camelCase`.
+
+### Общие конвенции
+- **Формат ошибки** (любой код 4xx/5xx): `{ "error": "человекочитаемое сообщение" }`
+- **Коды ошибок:**
+  - `400` — невалидные/неполные данные в запросе
+  - `401` — токен отсутствует, битый или протух → **фронт: очистить токен из localStorage и отправить на логин.** 401 всегда означает проблему с авторизацией, ничего другого им не кодируем.
+  - `404` — сущность не найдена
+  - `409` — конфликт (напр. email уже занят при регистрации)
+- **Пагинации нет** — списки отдаются целиком (для хакатона объёмов хватает).
+- **CORS:** в dev открыт для **всех origin** (`*`) — Live Server (:5500), `python -m http.server` (:8000), `file://` — всё пройдёт.
+- Даты — строки ISO / `YYYY-MM-DD`.
+
+---
 
 ### Авторизация (публичные)
-- `POST /api/auth/register` — `{ email, password }` → `{ token, user }`
-- `POST /api/auth/login` — `{ email, password }` → `{ token, user }`
-- `GET  /api/auth/me` — текущий пользователь по токену (защищён)
 
-### Справочник (публичные — токен не нужен)
-- `GET  /api/plants` — список карточек (поддержка `?q=` поиск по названию)
-- `GET  /api/plants/:id` — одна карточка
+`POST /api/auth/register` — тело `{ email, password }`
+`POST /api/auth/login` — тело `{ email, password }`
+Оба при успехе → `200`:
+```json
+{
+  "token": "eyJhbGciOi...",
+  "user": { "id": 1, "email": "user@mail.com" }
+}
+```
+Ошибки: `400` (нет email/пароля), `409` (email занят, только register), `401` (неверная пара login/пароль, только login).
 
-### Личный список
-- `GET    /api/collection` — растения пользователя (+ данные карточки)
-- `POST   /api/collection` — добавить `{ plantId, note?, waterIntervalDays? }`
-- `PATCH  /api/collection/:id` — правка заметок/интервала/дат полива
-- `DELETE /api/collection/:id` — удалить
+`GET /api/auth/me` — защищён → `200`:
+```json
+{ "id": 1, "email": "user@mail.com" }
+```
 
-### Избранное
-- `GET    /api/favorites` — избранные карточки
-- `POST   /api/favorites` — `{ plantId }`
-- `DELETE /api/favorites/:plantId`
+---
 
-### Напоминания
-- `GET /api/reminders` — что «пора» сделать: полить/пересадить по личному списку
-- `POST /api/collection/:id/watered` — отметить, что полил (сброс таймера)
+### Справочник (публичные — токен НЕ нужен, работает с первого коммита)
+
+`GET /api/plants` (опц. `?q=строка` — поиск по названию) → `200`, массив карточек:
+```json
+[
+  {
+    "id": 1,
+    "name": "Монстера",
+    "watering": "Раз в 5–7 дней, когда верхний слой подсох",
+    "light": "Яркий рассеянный свет",
+    "repotting": "Раз в 1–2 года весной",
+    "toxicity": "Ядовита для кошек и собак",
+    "notes": "Любит опрыскивание",
+    "waterIntervalDays": 7,
+    "repotIntervalDays": 365,
+    "imageUrl": "https://..."
+  }
+]
+```
+`GET /api/plants/:id` → `200` один объект той же формы; `404` если нет.
+
+---
+
+### Личный список (защищён)
+
+`GET /api/collection` → `200`, массив. **Карточка справочника вложена в `plant`**, пользовательские поля — снаружи:
+```json
+[
+  {
+    "id": 10,
+    "addedAt": "2026-07-03",
+    "note": "Стоит на кухне",
+    "waterIntervalDays": 5,
+    "repotIntervalDays": null,
+    "lastWateredAt": "2026-07-01",
+    "lastRepottedAt": null,
+    "plant": {
+      "id": 1,
+      "name": "Монстера",
+      "watering": "...",
+      "light": "...",
+      "repotting": "...",
+      "toxicity": "...",
+      "notes": "...",
+      "waterIntervalDays": 7,
+      "repotIntervalDays": 365,
+      "imageUrl": "https://..."
+    }
+  }
+]
+```
+`POST /api/collection` — тело `{ plantId, note?, waterIntervalDays?, repotIntervalDays? }` → `201`, созданный элемент (та же форма, что в GET). `400` если нет `plantId`, `404` если такого растения нет в справочнике.
+`PATCH /api/collection/:id` — тело с любыми из `{ note, waterIntervalDays, repotIntervalDays, lastWateredAt, lastRepottedAt }` → `200`, обновлённый элемент. `404` если не твой/нет.
+`DELETE /api/collection/:id` → `204` (без тела). `404` если не твой/нет.
+
+---
+
+### Избранное (защищён)
+
+`GET /api/favorites` → `200`, массив карточек справочника (та же форма, что `GET /api/plants`).
+`POST /api/favorites` — тело `{ plantId }` → `201` (идемпотентно: повтор не даёт ошибки). `404` если растения нет.
+`DELETE /api/favorites/:plantId` → `204`.
+
+---
+
+### Напоминания (защищён)
+
+`GET /api/reminders` → `200`, массив «пора сделать» по личному списку:
+```json
+[
+  {
+    "collectionId": 10,
+    "plantId": 1,
+    "name": "Монстера",
+    "action": "water",
+    "dueDate": "2026-07-06"
+  },
+  {
+    "collectionId": 10,
+    "plantId": 1,
+    "name": "Монстера",
+    "action": "repot",
+    "dueDate": "2026-06-15"
+  }
+]
+```
+`action` ∈ `"water" | "repot"`. Одно растение может дать несколько элементов (и полив, и пересадка). Пустой массив = ничего не пора.
+
+`POST /api/collection/:id/watered` → `200`, обновлённый элемент коллекции (сбрасывает `lastWateredAt` на сегодня). Аналогично может появиться `/repotted` при необходимости.
 
 ---
 

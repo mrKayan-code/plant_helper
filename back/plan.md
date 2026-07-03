@@ -28,13 +28,13 @@
 
 ---
 
-## Шаг 2 — БД и схема (`src/db.js`)
-- [ ] `import { DatabaseSync } from 'node:sqlite'`
-- [ ] Открыть `data/plant_helper.db`
-- [ ] `CREATE TABLE IF NOT EXISTS` для: `users`, `plants`, `collection`, `favorites` (по модели из `../plan.md`)
-- [ ] Экспортировать `db` для использования в роутерах
+## Шаг 2 — БД и схема (`src/db.js`) ✅
+- [x] `DatabaseSync` из `node:sqlite`, путь через `import.meta.dirname`
+- [x] `PRAGMA foreign_keys = ON`
+- [x] `CREATE TABLE IF NOT EXISTS`: `users`, `plants`, `collection`, `favorites` + FK + индексы
+- [x] Экспорт `db`, инициализация при старте (import в server.js)
 
-**Проверка:** файл `data/plant_helper.db` создаётся, таблицы есть (`sqlite3 data/plant_helper.db ".tables"`).
+**Проверка:** ✅ таблицы созданы, `repot_interval_days` есть в plants и collection.
 
 ---
 
@@ -120,3 +120,9 @@
 ## Заметки / решения по ходу
 <!-- сюда пишем нестандартные решения, костыли, договорённости -->
 - node:sqlite синхронный (DatabaseSync) — async/await для БД не нужен.
+- **Именование:** в БД колонки `snake_case`, в JSON API — `camelCase` (по контракту).
+  Значит в роутерах нужен маппинг при отдаче: `water_interval_days` → `waterIntervalDays`.
+  Сделаем маленький хелпер-сериализатор на растение/элемент коллекции, чтобы не дублировать.
+- **CORS:** `cors()` без опций = разрешены все origin (`*`). Для хакатон-демо ок; на прод сузить.
+- **Публичность справочника:** `/api/plants*` монтируем БЕЗ `requireAuth` — работает даже если auth сломан.
+- **Напоминания:** пересадка считается по `repot_interval_days` (добавлено в plants + override в collection).
