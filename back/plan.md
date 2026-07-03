@@ -7,25 +7,24 @@
 
 ---
 
-## Шаг 0 — Инициализация проекта
-- [ ] `cd back && yarn init -y`
-- [ ] В `package.json`: `"type": "module"`, скрипт `"start": "node --watch src/server.js"`
-- [ ] `yarn add express cors jsonwebtoken`
-- [ ] Создать `.env` (в gitignore): `JWT_SECRET=...`, `PORT=3000`
-- [ ] Пустые файлы по структуре из README
+## Шаг 0 — Инициализация проекта ✅
+- [x] `package.json`: `"type": "module"`, start = `node --watch --env-file=.env src/server.js`
+- [x] `yarn add express cors jsonwebtoken` (Express 5)
+- [x] `.env` (в gitignore) с рандомным `JWT_SECRET` + `PORT=3000`; `.env.example` для команды
+- [x] Структура папок
 
-**Проверка:** `yarn start` не падает.
+**Проверка:** ✅ сервер запускается.
 
 ---
 
-## Шаг 1 — Сервер-каркас (`src/server.js`)
-- [ ] Express + `cors()` + `express.json()`
-- [ ] `GET /api/health` → `{ ok: true }`
-- [ ] Подключить роутеры (пока заглушки)
-- [ ] Слушать `PORT`
+## Шаг 1 — Сервер-каркас (`src/server.js`) ✅
+- [x] Express + `cors()` + `express.json()`
+- [x] `GET /api/health` → `{ ok: true }`
+- [ ] Подключить роутеры (по мере готовности — заготовка в коде)
+- [x] Слушать `PORT` из env
 
-**Проверка:** `curl localhost:3000/api/health` → `{"ok":true}`
-👉 после этого шага фронт разблокирован — можно стучаться на сервер.
+**Проверка:** ✅ `curl localhost:3000/api/health` → `{"ok":true}` (200)
+👉 фронт разблокирован — можно стучаться на сервер.
 
 ---
 

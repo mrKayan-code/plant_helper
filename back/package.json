@@ -1,0 +1,15 @@
+{
+  "name": "plant-helper-back",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Plant Helper backend — Express + node:sqlite",
+  "scripts": {
+    "start": "node --watch --env-file=.env src/server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
