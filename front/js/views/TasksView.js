@@ -1,3 +1,4 @@
+import { todayISO } from "../utils/dateUtils.js";
 
 const ACTION_ICON = { water: "💧", repot: "🌱" };
 const ACTION_LABEL = { water: "Полить", repot: "Пересадить" };
@@ -5,6 +6,7 @@ const ACTION_LABEL = { water: "Полить", repot: "Пересадить" };
 export class TasksView {
   constructor(viewModel) {
     this.vm = viewModel;
+    this._today = todayISO();
 
     this.els = {
       filters: document.getElementById("tasksFilters"),
@@ -29,39 +31,42 @@ export class TasksView {
   }
 
   render(state) {
+    this._today = todayISO();
+
     this.els.filters.querySelectorAll("[data-filter]").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.filter === state.filter);
     });
 
-    this.els.urgentSection.hidden = !(state.filter === "today" || state.filter === "all");
-    this.els.upcomingSection.hidden = !(state.filter === "tomorrow" || state.filter === "all");
+    const isUrgent = state.filter === "today"; // вкладка "Срочно"
+    this.els.urgentSection.hidden = !isUrgent;
+    this.els.upcomingSection.hidden = isUrgent;
 
     if (state.loading) {
-      this.els.urgentList.innerHTML = `<p class="empty-hint">Загрузка…</p>`;
-      this.els.upcomingList.innerHTML = "";
+      (isUrgent ? this.els.urgentList : this.els.upcomingList).innerHTML = `<p class="empty-hint">Загрузка…</p>`;
       this.els.completedSection.hidden = true;
       return;
     }
     if (state.error) {
-      this.els.urgentList.innerHTML = `<p class="empty-hint">${state.error}</p>`;
-      this.els.upcomingList.innerHTML = "";
+      (isUrgent ? this.els.urgentList : this.els.upcomingList).innerHTML = `<p class="empty-hint">${state.error}</p>`;
       this.els.completedSection.hidden = true;
       return;
     }
 
-    this.renderList(this.els.urgentList, state.urgent, state, "Срочных задач нет 🌿");
-    const upcomingData = state.filter === "tomorrow" ? state.tomorrow : state.upcoming;
-    const upcomingEmptyText = state.filter === "tomorrow"
-      ? "На завтра ничего не запланировано"
-      : "Предстоящих задач нет";
-    this.els.upcomingTitle.textContent = state.filter === "tomorrow" ? "Скоро" : "Все предстоящие задачи";
-    this.renderList(this.els.upcomingList, upcomingData, state, upcomingEmptyText);
+    if (isUrgent) {
+      this.renderList(this.els.urgentList, state.urgent, state, "Срочных задач нет 🌿");
+    } else if (state.filter === "tomorrow") {
+      this.els.upcomingTitle.textContent = "Завтра";
+      this.renderList(this.els.upcomingList, state.tomorrow, state, "На завтра ничего не запланировано");
+    } else {
+      this.els.upcomingTitle.textContent = "Все задачи";
+      this.renderList(this.els.upcomingList, state.all, state, "Задач нет 🌿");
+    }
 
     this.els.completedSection.hidden = state.completedToday.length === 0;
     this.renderCompleted(state.completedToday);
   }
 
-  renderList(container, reminders, state, emptyText) {
+  renderList(container, reminders = [], state, emptyText) {
     container.innerHTML = "";
     if (reminders.length === 0) {
       container.innerHTML = `<p class="empty-hint">${emptyText}</p>`;
@@ -73,9 +78,10 @@ export class TasksView {
   buildTaskRow(reminder, state) {
     const key = `${reminder.collectionId}:${reminder.action}`;
     const busy = state.completingKey === key;
+    const isUrgent = reminder.dueDate <= this._today; // просрочено/сегодня — везде выделяем
 
     const row = document.createElement("label");
-    row.className = "task-row task-row--checkable";
+    row.className = "task-row task-row--checkable" + (isUrgent ? " task-row--urgent" : "");
     row.innerHTML = `
       <input type="checkbox" class="task-checkbox" ${busy ? "disabled" : ""}>
       <span class="task-icon">${ACTION_ICON[reminder.action]}</span>
