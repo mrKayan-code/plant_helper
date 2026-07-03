@@ -13,17 +13,19 @@ router.get('/', (req, res) => {
   res.json(rows.map(serializePlant));
 });
 
-// POST /api/favorites — { plantId } (идемпотентно)
+// POST /api/favorites — { plantId } (идемпотентно) → 201 + карточка растения
 router.post('/', (req, res) => {
   const { plantId } = req.body ?? {};
   if (!plantId) {
     return res.status(400).json({ error: 'Нужен plantId' });
   }
-  if (!plantsRepo.exists(plantId)) {
+  const plant = plantsRepo.findById(plantId);
+  if (!plant) {
     return res.status(404).json({ error: 'Растение из справочника не найдено' });
   }
   favoritesRepo.add(req.userId, plantId);
-  res.status(201).end();
+  // Отдаём тело (карточку), а не пустой 201 — иначе клиент, делающий res.json(), падает
+  res.status(201).json(serializePlant(plant));
 });
 
 // DELETE /api/favorites/:plantId

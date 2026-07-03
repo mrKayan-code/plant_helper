@@ -17,7 +17,8 @@ function addDays(dateStr, days) {
 // Окном НЕ ограничиваем: отдаём всё расписание, фронт сам раскладывает
 // по бакетам "сегодня / завтра / все" (см. TasksViewModel).
 function buildReminder(item, action, lastDate, interval) {
-  if (!lastDate || !interval) return null; // нет даты/интервала — посчитать нельзя
+  // Явная проверка на null/undefined: интервал 0 — валиден (труши-проверка !interval его бы съела)
+  if (lastDate == null || lastDate === '' || interval == null) return null;
   return {
     collectionId: item.id,
     plantId: item.plant.id,

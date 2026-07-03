@@ -160,6 +160,12 @@ db.js                — соединение с SQLite + схема + seed (sin
 Фикс: (1) `create` ставит обе даты = `date('now')`; (2) `/reminders` отдаёт полное
 расписание без окна. Фронт раскладывает по бакетам (см. `front/FIX-reminders.md`).
 
+## Багфикс: интервал 0 и пустой POST favorites ✅
+- `/reminders`: truthy-проверка `!interval` съедала интервал `0` → явная `interval == null`.
+- `POST /favorites`: отдавал пустой `201` → клиентский `res.json()` падал (SyntaxError).
+  Теперь `201` + карточка растения (консистентно с `POST /collection`). Фронт может
+  вернуть `favorites` на реальный API. У фронта та же 0-проверка в GardenViewModel — см. FIX-reminders.md.
+
 ## Заметки / решения по ходу
 <!-- сюда пишем нестандартные решения, костыли, договорённости -->
 - node:sqlite синхронный (DatabaseSync) — async/await для БД не нужен.
