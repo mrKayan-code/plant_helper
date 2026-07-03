@@ -43,8 +43,6 @@ const COPY = {
   },
 };
 
-const EARLY_THRESHOLD = { water: 2, repot: 14 };
-
 export class CareConfirmViewModel extends EventEmitter {
   constructor(collectionStore, notifier) {
     super();
@@ -81,9 +79,9 @@ export class CareConfirmViewModel extends EventEmitter {
 
   #tone(action, daysLeft) {
     if (daysLeft == null) return "due";
-    if (daysLeft < 0) return "overdue";
-    if (daysLeft >= EARLY_THRESHOLD[action]) return "early";
-    return "due";
+    if (daysLeft < 0) return "overdue"; // срок прошёл — просрочено
+    if (daysLeft > 0) return "early";   // раньше запланированного дня (даже на 1 день)
+    return "due";                       // ровно в запланированный день (daysLeft === 0)
   }
 
   async confirm() {
