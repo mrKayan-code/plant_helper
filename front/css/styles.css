@@ -929,3 +929,37 @@ button:focus-visible {
   .app-main { padding: var(--space-6) var(--space-6) var(--space-6) 80px; }
   .plant-tile-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 }
+/* --- Единая форма подтверждения ухода --- */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 46, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 60;
+}
+.confirm-backdrop[hidden] { display: none; }
+
+.confirm-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: 0 12px 40px rgba(31, 46, 34, 0.25);
+  text-align: center;
+  border-top: 4px solid var(--color-moss-500);
+}
+.confirm-modal.tone-overdue { border-top-color: var(--color-clay-600); }
+.confirm-modal.tone-early   { border-top-color: #C9A227; }
+.confirm-modal.tone-due     { border-top-color: var(--color-moss-500); }
+
+.confirm-emoji { font-size: 2.4rem; line-height: 1; margin-bottom: var(--space-2); }
+.confirm-title { font-size: 1.15rem; font-weight: 600; margin: 0 0 var(--space-2); }
+.confirm-body  { color: var(--color-text-muted); margin: 0 0 var(--space-4); line-height: 1.45; }
+
+.confirm-actions { display: flex; gap: var(--space-3); }
+.confirm-actions .btn-primary,
+.confirm-actions .btn-secondary { flex: 1; text-align: center; }

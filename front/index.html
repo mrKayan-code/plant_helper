@@ -231,6 +231,19 @@
     </div>
   </div>
 
+  <!-- Единая форма подтверждения ухода (полив/пересадка) -->
+  <div class="confirm-backdrop" id="careConfirmBackdrop" hidden>
+    <div class="confirm-modal tone-due" id="careConfirmModal" role="dialog" aria-modal="true">
+      <div class="confirm-emoji" id="careConfirmEmoji"></div>
+      <h3 class="confirm-title" id="careConfirmTitle"></h3>
+      <p class="confirm-body" id="careConfirmBody"></p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" id="careConfirmCancel">Отмена</button>
+        <button class="btn-primary" id="careConfirmOk"></button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

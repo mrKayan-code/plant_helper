@@ -1,16 +1,17 @@
 import { EventEmitter } from "../core/EventEmitter.js";
-import { todayISO, addDaysISO } from "../utils/dateUtils.js";
+import { todayISO, addDaysISO, daysBetweenISO } from "../utils/dateUtils.js";
 
 // ViewModel экрана "Задачи". Задачи читает из remindersStore, отметки
 // "полито/пересажено" делает через collectionStore. Полил → коллекция
 // изменилась → remindersStore сам перечитался → задачи пересчитались.
 // "Выполнено сегодня" — сессионный список на фронте (бэк историю не хранит).
 export class TasksViewModel extends EventEmitter {
-  constructor(collectionStore, remindersStore, notifier) {
+  constructor(collectionStore, remindersStore, notifier, careConfirm) {
     super();
     this.collectionStore = collectionStore;
     this.remindersStore = remindersStore;
     this.notifier = notifier;
+    this.careConfirm = careConfirm;
 
     this.state = {
       filter: "all", // "today" | "tomorrow" | "all"
@@ -66,29 +67,27 @@ export class TasksViewModel extends EventEmitter {
     this.emit("change", this.state);
   }
 
-  async completeTask(reminder) {
+  // Отметить задачу — через единую форму подтверждения. Она сама вызовет
+  // collectionStore после подтверждения, а onDone добавит в "выполнено сегодня".
+  completeTask(reminder) {
     const key = `${reminder.collectionId}:${reminder.action}`;
-    this.state = { ...this.state, completingKey: key };
-    this.emit("change", this.state);
+    const daysLeft = daysBetweenISO(todayISO(), reminder.dueDate);
 
-    try {
-      if (reminder.action === "water") {
-        await this.collectionStore.markWatered(reminder.collectionId);
-      } else {
-        await this.collectionStore.markRepotted(reminder.collectionId);
-      }
-      // collectionStore → remindersStore перечитались; фиксируем "выполнено" и пересчитываем
-      this.notifier.show(reminder.action === "water" ? "Отмечено: полито 💧" : "Отмечено: пересажено 🌱");
-      this.state = {
-        ...this.state,
-        completingKey: null,
-        completedToday: [...this.state.completedToday, { key, name: reminder.name, action: reminder.action }],
-      };
-      this.recompute();
-    } catch (err) {
-      console.error(err);
-      this.state = { ...this.state, completingKey: null };
-      this.emit("change", this.state);
-    }
+    this.careConfirm.request({
+      collectionId: reminder.collectionId,
+      name: reminder.name,
+      action: reminder.action,
+      daysLeft,
+      onDone: () => {
+        this.state = {
+          ...this.state,
+          completedToday: [...this.state.completedToday, { key, name: reminder.name, action: reminder.action }],
+        };
+        this.recompute();
+      },
+    });
+
+    // перерисовать список — сбросить только что кликнутый чекбокс (модалка сверху)
+    this.emit("change", this.state);
   }
 }

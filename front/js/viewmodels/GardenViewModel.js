@@ -7,11 +7,12 @@ import { todayISO, addDaysISO, daysBetweenISO } from "../utils/dateUtils.js";
 // идёт через стор → он рассылает "change" → все экраны обновляются сами.
 // Это единый источник правды: "протухший стейт" становится невозможен.
 export class GardenViewModel extends EventEmitter {
-  constructor(collectionStore, favoritesStore, notifier) {
+  constructor(collectionStore, favoritesStore, notifier, careConfirm) {
     super();
     this.collectionStore = collectionStore;
     this.favoritesStore = favoritesStore;
     this.notifier = notifier;
+    this.careConfirm = careConfirm;
 
     this.state = {
       viewMode: "grid",
@@ -158,21 +159,30 @@ export class GardenViewModel extends EventEmitter {
     }
   }
 
-  async markWatered(id) {
-    try {
-      await this.collectionStore.markWatered(id);
-      this.notifier.show("Отмечено: полито 💧");
-    } catch (err) {
-      console.error(err);
-    }
+  // Полив/пересадка идут через единую форму подтверждения (она сама
+  // вызовет collectionStore после подтверждения). Считаем daysLeft, чтобы
+  // форма показала нужный тон (просрочено / рано / пора).
+  markWatered(id) {
+    const item = this.state.items.find((i) => i.id === id);
+    if (!item) return;
+    const status = this.getCareStatus(item).water;
+    this.careConfirm.request({
+      collectionId: item.id,
+      name: item.plant.name,
+      action: "water",
+      daysLeft: status.tracked ? status.daysLeft : null,
+    });
   }
 
-  async markRepotted(id) {
-    try {
-      await this.collectionStore.markRepotted(id);
-      this.notifier.show("Отмечено: пересажено 🌱");
-    } catch (err) {
-      console.error(err);
-    }
+  markRepotted(id) {
+    const item = this.state.items.find((i) => i.id === id);
+    if (!item) return;
+    const status = this.getCareStatus(item).repot;
+    this.careConfirm.request({
+      collectionId: item.id,
+      name: item.plant.name,
+      action: "repot",
+      daysLeft: status.tracked ? status.daysLeft : null,
+    });
   }
 }
