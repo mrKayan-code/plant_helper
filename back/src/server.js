@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import './db.js'; // инициализация БД + схемы при старте
 import plantsRouter from './routes/plants.js';
+import authRouter from './routes/auth.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // --- роутеры ---
+app.use('/api/auth', authRouter);     // регистрация / логин (публичные)
 app.use('/api/plants', plantsRouter); // справочник (публичный)
 
 app.listen(PORT, () => {

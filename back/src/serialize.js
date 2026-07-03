@@ -1,6 +1,12 @@
 // Преобразование строк из БД (snake_case) в формат API (camelCase).
 // Держим маппинг в одном месте, чтобы контракт не разъезжался.
 
+/** Пользователь: наружу отдаём только безопасные поля (без password_hash). */
+export function serializeUser(row) {
+  if (!row) return null;
+  return { id: row.id, email: row.email };
+}
+
 /** Карточка справочника: строка таблицы plants → объект API. */
 export function serializePlant(row) {
   if (!row) return null;

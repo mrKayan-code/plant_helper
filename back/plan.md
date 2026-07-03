@@ -57,14 +57,15 @@
 
 ---
 
-## Шаг 5 — Авторизация (`src/auth.js` + `src/routes/auth.js`)
-- [ ] `auth.js`: `hashPassword` / `verifyPassword` через `crypto.scrypt` (формат `соль:хеш`)
-- [ ] `auth.js`: `signToken(userId)` / `verifyToken(token)` через `jsonwebtoken`
-- [ ] `POST /api/auth/register` — проверка занятости email, хеш, insert, вернуть `{token, user}`
-- [ ] `POST /api/auth/login` — найти по email, verify, вернуть `{token, user}`
-- [ ] Ошибки: 409 (email занят), 401 (неверные данные)
+## Шаг 5 — Авторизация (`src/auth.js` + `src/routes/auth.js`) ✅
+- [x] `auth.js`: `hashPassword` / `verifyPassword` через `scryptSync` (формат `соль:хеш`, timing-safe)
+- [x] `auth.js`: `signToken(userId)` / `verifyToken(token)` через `jsonwebtoken` (TTL 7д)
+- [x] `POST /api/auth/register` — валидация email/пароля, 409 если занят, insert, `{token, user}`
+- [x] `POST /api/auth/login` — verify, 401 (общий текст, не палим наличие email)
+- [x] `serializeUser` — наружу только `{id, email}`, без хеша
 
-**Проверка:** register → приходит token; login с тем же паролем → token; с неверным → 401.
+**Проверка:** ✅ register→201+token; повтор→409; login→200; неверный→401; валидация→400.
+В БД лежит хеш (не пароль), JWT декодируется в `{userId}`.
 
 ---
 
