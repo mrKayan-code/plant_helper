@@ -40,8 +40,6 @@ export class CatalogView {
     if (this.vm.state.plants.length === 0 && !this.vm.state.error) {
       this.vm.init();
     } else {
-      // справочник уже загружен — обновляем только избранное (могло измениться
-      // в «Мой сад» или при смене аккаунта)
       this.vm.reloadFavorites();
     }
   }
@@ -111,7 +109,7 @@ export class CatalogView {
 
     const favBtn = card.querySelector(".card-favorite-btn");
     favBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // не открывать деталку при клике на звёздочку
+      e.stopPropagation();
       this.vm.toggleFavorite(plant.id);
     });
 
