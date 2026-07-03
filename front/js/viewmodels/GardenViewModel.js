@@ -1,16 +1,16 @@
 // js/viewmodels/GardenViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
+import { todayISO, addDaysISO, daysBetweenISO } from "../utils/dateUtils.js";
 
 // ViewModel экрана "Мой сад". После любого мутирующего действия (сохранить,
 // удалить, полить, пересадить) просто перезагружаем весь список из
 // источника правды через load() — это чуть дороже по сети, чем точечно
 // патчить локальный массив, но полностью исключает рассинхрон состояния.
 export class GardenViewModel extends EventEmitter {
-  constructor(collectionService, favoritesService, remindersService, notifier) {
+  constructor(collectionService, favoritesService, notifier) {
     super();
     this.collectionService = collectionService;
     this.favoritesService = favoritesService;
-    this.remindersService = remindersService;
     this.notifier = notifier;
 
     this.state = {
@@ -20,7 +20,6 @@ export class GardenViewModel extends EventEmitter {
       items: [],
       query: "",
       favoriteIds: new Set(),
-      reminderMap: new Map(), // collectionId -> Reminder[]
       editingId: null,
       editForm: { note: "", waterIntervalDays: "", repotIntervalDays: "", isFavorite: false },
       saving: false,
@@ -32,24 +31,16 @@ export class GardenViewModel extends EventEmitter {
     this.emit("change", this.state);
 
     try {
-      const [items, favorites, reminders] = await Promise.all([
+      const [items, favorites] = await Promise.all([
         this.collectionService.getAll(),
         this.favoritesService.getAll(),
-        this.remindersService.getAll(),
       ]);
-
-      const reminderMap = new Map();
-      reminders.forEach((r) => {
-        if (!reminderMap.has(r.collectionId)) reminderMap.set(r.collectionId, []);
-        reminderMap.get(r.collectionId).push(r);
-      });
 
       this.state = {
         ...this.state,
         loading: false,
         items,
         favoriteIds: new Set(favorites.map((p) => p.id)),
-        reminderMap,
       };
     } catch (err) {
       const message = err.message === "Unauthorized"
@@ -80,12 +71,33 @@ export class GardenViewModel extends EventEmitter {
     return this.state.items.filter((item) => item.plant.name.toLowerCase().includes(q));
   }
 
-  getRemindersFor(collectionItemId) {
-    return this.state.reminderMap.get(collectionItemId) || [];
-  }
-
   isFavorite(plantId) {
     return this.state.favoriteIds.has(plantId);
+  }
+
+  // Считает точный статус ухода по одному растению: сколько дней осталось
+  // до полива/пересадки (или на сколько дней просрочено). Это сердце
+  // механики "когда нужен полив" — единственное место, где она вычисляется.
+  //
+  // tracked: false — действие ни разу не отмечали (нет даты) или для него
+  //   не задан интервал (ни в collection, ни в справочнике) — посчитать нечего.
+  // daysLeft > 0  — сколько дней остаётся.
+  // daysLeft === 0 — нужно делать сегодня.
+  // daysLeft < 0  — просрочено на |daysLeft| дней.
+  getCareStatus(item) {
+    return {
+      water: this._computeStatus(item.lastWateredAt, item.waterIntervalDays ?? item.plant.waterIntervalDays),
+      repot: this._computeStatus(item.lastRepottedAt, item.repotIntervalDays ?? item.plant.repotIntervalDays),
+    };
+  }
+
+  _computeStatus(lastDateISO, intervalDays) {
+    if (!lastDateISO || !intervalDays) {
+      return { tracked: false, daysLeft: null };
+    }
+    const dueDate = addDaysISO(lastDateISO, intervalDays);
+    const daysLeft = daysBetweenISO(todayISO(), dueDate);
+    return { tracked: true, daysLeft };
   }
 
   openEdit(itemId) {

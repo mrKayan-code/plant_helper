@@ -1,5 +1,6 @@
 // js/views/GardenView.js
 import { config } from "../config.js";
+import { daysWord } from "../utils/pluralize.js";
 
 export class GardenView {
   constructor(viewModel) {
@@ -50,7 +51,7 @@ export class GardenView {
   }
 
   onShow() {
-  this.vm.load();
+    this.vm.load();
   }
 
   render(state) {
@@ -90,34 +91,39 @@ export class GardenView {
       return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
     items.forEach((item) => {
       content.appendChild(
-        state.viewMode === "grid" ? this.buildGridCard(item, today) : this.buildListRow(item, today)
+        state.viewMode === "grid" ? this.buildGridCard(item) : this.buildListRow(item)
       );
     });
   }
 
-  buildBadgesHTML(item, today) {
-    const reminders = this.vm.getRemindersFor(item.id);
+  buildBadgesHTML(item) {
+    const status = this.vm.getCareStatus(item);
+    return this.formatCareBadge("water", status.water) + this.formatCareBadge("repot", status.repot);
+  }
 
-    if (reminders.length > 0) {
-      return reminders
-        .map((r) => {
-          const icon = r.action === "water" ? "💧" : "🪴";
-          const label = r.action === "water" ? "Полить" : "Пересадить";
-          const urgent = r.dueDate <= today;
-          return `<span class="garden-badge ${urgent ? "garden-badge--urgent" : "garden-badge--soon"}">${icon} ${label}</span>`;
-        })
-        .join("");
+  formatCareBadge(action, status) {
+    const icon = action === "water" ? "💧" : "🪴";
+    const label = action === "water" ? "Полить" : "Пересадить";
+
+    if (!status.tracked) {
+      return `<span class="garden-badge garden-badge--muted">${icon} Не отслеживается</span>`;
     }
 
-    const untracked = [];
-    if (!item.lastWateredAt) untracked.push('<span class="garden-badge garden-badge--muted">💧 Не отслеживается</span>');
-    if (!item.lastRepottedAt) untracked.push('<span class="garden-badge garden-badge--muted">🪴 Не отслеживается</span>');
-    if (untracked.length > 0) return untracked.join("");
+    const { daysLeft } = status;
 
-    return `<span class="garden-badge garden-badge--ok">🌿 Всё в порядке</span>`;
+    if (daysLeft < 0) {
+      const overdueBy = Math.abs(daysLeft);
+      return `<span class="garden-badge garden-badge--urgent">${icon} ${label}: просрочено на ${overdueBy} ${daysWord(overdueBy)}</span>`;
+    }
+    if (daysLeft === 0) {
+      return `<span class="garden-badge garden-badge--urgent">${icon} ${label} сегодня</span>`;
+    }
+    if (daysLeft === 1) {
+      return `<span class="garden-badge garden-badge--soon">${icon} ${label} завтра</span>`;
+    }
+    return `<span class="garden-badge garden-badge--ok">${icon} через ${daysLeft} ${daysWord(daysLeft)}</span>`;
   }
 
   buildActions(item) {
@@ -138,7 +144,7 @@ export class GardenView {
     return wrap;
   }
 
-  buildGridCard(item, today) {
+  buildGridCard(item) {
     const card = document.createElement("div");
     card.className = "garden-card";
     card.innerHTML = `
@@ -149,7 +155,7 @@ export class GardenView {
       <div class="garden-card-body">
         <div class="garden-card-name"></div>
         <div class="garden-card-note"></div>
-        <div class="garden-badges">${this.buildBadgesHTML(item, today)}</div>
+        <div class="garden-badges">${this.buildBadgesHTML(item)}</div>
       </div>
     `;
     const img = card.querySelector(".garden-card-img");
@@ -162,7 +168,7 @@ export class GardenView {
     return card;
   }
 
-  buildListRow(item, today) {
+  buildListRow(item) {
     const row = document.createElement("div");
     row.className = "garden-row";
     row.innerHTML = `
@@ -173,7 +179,7 @@ export class GardenView {
           ${this.vm.isFavorite(item.plant.id) ? '<span class="garden-row-fav" title="В избранном">★</span>' : ""}
         </div>
         <div class="garden-row-note"></div>
-        <div class="garden-badges">${this.buildBadgesHTML(item, today)}</div>
+        <div class="garden-badges">${this.buildBadgesHTML(item)}</div>
       </div>
     `;
     const img = row.querySelector(".garden-row-img");

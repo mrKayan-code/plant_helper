@@ -45,7 +45,6 @@ router.register("catalog", new CatalogView(catalogViewModel));
 const gardenViewModel = new GardenViewModel(
   container.collectionService,
   container.favoritesService,
-  container.remindersService,
   container.notifier
 );
 router.register("garden", new GardenView(gardenViewModel));
