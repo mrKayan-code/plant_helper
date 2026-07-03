@@ -151,38 +151,10 @@ favorites (
 
 ---
 
-# ═══ НАША ЧАСТЬ (бэкенд, папка back/) ═══
+# ═══ ПЛАНЫ КОМАНД ═══
 
-## Этапы работы
-
-### Этап 0 — Каркас (разблокирует фронт)
-- [ ] `yarn init`, поставить `express`, `cors`, `jsonwebtoken`
-- [ ] `src/server.js` — Express + CORS + health-check `GET /api/health`
-- [ ] `src/db.js` — создать схему (users, plants, collection, favorites) через `node:sqlite`
-- [ ] `data/seed-plants.json` — 10-15 карточек, seed при старте
-- [ ] Согласовать контракт с фронтом (эту секцию отдать соседям)
-
-### Этап 1 — Авторизация + справочник
-- [ ] `src/auth.js` — scrypt-хеш/verify, выпуск/проверка JWT
-- [ ] `src/middleware/requireAuth.js`
-- [ ] `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
-- [ ] `GET /api/plants`, `GET /api/plants/:id`, поиск `?q=`
-
-### Этап 2 — Личный список + избранное (защищённые)
-- [ ] CRUD `/api/collection` (по `req.userId`)
-- [ ] CRUD `/api/favorites` (по `req.userId`)
-
-### Этап 3 — Напоминания
-- [ ] `GET /api/reminders` — вычисление «пора полить/пересадить»
-- [ ] `POST /api/collection/:id/watered`
-
-### Этап 4 — Стыковка и рабочее демо end-to-end (цель)
-- [ ] Прогнать весь путь: открыть карточку → добавить в список → получить напоминание
-
-### Этап 5 — Усложнения (ТОЛЬКО после рабочего демо, по одному)
-- [ ] Обмен растениями + чат (уже есть users — база готова)
-- [ ] Рекомендательная система
-- [ ] Распознавание по фото
+- **Бэк:** пошаговый план реализации → `back/plan.md`
+- **Фронт:** команда фронта ведёт свой план в `front/` по своему усмотрению
 
 ---
 
