@@ -11,35 +11,31 @@
 </head>
 <body>
 
-  <!-- Постоянная боковая панель (не выезжающая — десктоп, мобильная версия не нужна) -->
   <nav class="sidebar" aria-label="Основная навигация">
     <div class="sidebar-header">
-      <span class="sidebar-leaf" aria-hidden="true">🌿</span>
+      <span class="sidebar-leaf" aria-hidden="true"></span>
       <span class="sidebar-title">Мой зелёный<br>уголок</span>
     </div>
     <ul class="sidebar-nav">
-      <li><button class="sidebar-link active" data-screen="home"><span class="sidebar-icon">🏠</span>Главная</button></li>
-      <li><button class="sidebar-link" data-screen="catalog"><span class="sidebar-icon">📖</span>Энциклопедия</button></li>
-      <li><button class="sidebar-link" data-screen="garden"><span class="sidebar-icon">🪴</span>Мой сад</button></li>
-      <li><button class="sidebar-link" data-screen="tasks"><span class="sidebar-icon">✅</span>Задачи</button></li>
+      <li><button class="sidebar-link active" data-screen="home"><span class="sidebar-icon"></span>Главная</button></li>
+      <li><button class="sidebar-link" data-screen="catalog"><span class="sidebar-icon"></span>Энциклопедия</button></li>
+      <li><button class="sidebar-link" data-screen="garden"><span class="sidebar-icon"></span>Мой сад</button></li>
+      <li><button class="sidebar-link" data-screen="tasks"><span class="sidebar-icon"></span>Задачи</button></li>
     </ul>
   </nav>
 
-  <!-- Кнопка аккаунта — видна на всех экранах, не блокирует доступ к сайту -->
   <button class="account-btn" id="accountBtn">
     <span class="account-btn-icon" aria-hidden="true">👤</span>
     <span id="accountBtnLabel">Войти</span>
   </button>
 
-  <!-- Модалка входа/регистрации/аккаунта -->
   <div class="modal-backdrop" id="accountModalBackdrop" hidden>
     <div class="modal-card">
       <button class="modal-close" id="accountModalClose" aria-label="Закрыть">×</button>
 
-      <!-- Показывается, если НЕ авторизован -->
       <div id="authFormBlock">
         <div class="auth-brand">
-          <span class="auth-leaf" aria-hidden="true">🌿</span>
+          <span class="auth-leaf" aria-hidden="true"></span>
           <h2 class="auth-title">Мой зелёный уголок</h2>
         </div>
         <p class="auth-subtitle" id="authSubtitle">Войдите, чтобы продолжить</p>
@@ -60,10 +56,9 @@
         <button class="link-btn auth-toggle" id="authToggleBtn">Нет аккаунта? Зарегистрироваться</button>
       </div>
 
-      <!-- Показывается, если авторизован -->
       <div id="accountInfoBlock" hidden>
         <div class="auth-brand">
-          <span class="auth-leaf" aria-hidden="true">🌿</span>
+          <span class="auth-leaf" aria-hidden="true"></span>
           <h2 class="auth-title">Аккаунт</h2>
         </div>
         <p class="account-email" id="accountEmail"></p>
@@ -74,7 +69,6 @@
 
   <main class="app-main">
 
-    <!-- ЭКРАН: Главная -->
     <section class="screen active" id="screen-home">
 
       <div class="greeting-card">
@@ -119,10 +113,8 @@
 
     </section>
 
-    <!-- ЭКРАН: Энциклопедия -->
     <section class="screen" id="screen-catalog">
 
-      <!-- Подэкран 1: список справочника -->
       <div class="catalog-view" id="catalogListView">
         <div class="catalog-header">
           <h2 class="page-title">Энциклопедия растений</h2>
@@ -149,18 +141,15 @@
         </div>
       </div>
 
-      <!-- Подэкран 2: детальная карточка растения (скрыт по умолчанию) -->
       <div class="catalog-view" id="catalogDetailView" hidden>
         <button class="back-btn" id="catalogBackBtn">← Назад к энциклопедии</button>
 
         <div class="detail-card" id="catalogDetailCard">
-          <!-- наполняется через catalog.js -->
         </div>
       </div>
 
     </section>
 
-    <!-- ЭКРАН: Мой сад -->
     <section class="screen" id="screen-garden">
       <div class="garden-header">
         <h2 class="page-title" id="gardenTitle">Моя коллекция</h2>
@@ -183,7 +172,6 @@
       <button class="btn-primary garden-add-btn" data-screen="catalog">+ Добавить растение</button>
     </section>
 
-    <!-- ЭКРАН: Задачи -->
     <section class="screen" id="screen-tasks">
       <div class="tasks-header">
         <h2 class="page-title">Задачи</h2>
@@ -214,7 +202,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Шторка редактирования растения из сада — выезжает снизу -->
   <div class="edit-drawer-overlay" id="editDrawerOverlay" hidden></div>
   <div class="edit-drawer" id="editDrawer">
     <div class="edit-drawer-handle"></div>
