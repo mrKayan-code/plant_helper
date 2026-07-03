@@ -10,34 +10,25 @@
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
- 
-  <div class="drawer-overlay" id="drawerOverlay"></div>
- 
-  <nav class="drawer" id="drawer" aria-label="Основная навигация">
-    <div class="drawer-header">
-      <span class="drawer-leaf" aria-hidden="true"></span>
-      <span class="drawer-title">Мой зелёный уголок</span>
+
+  <nav class="sidebar" aria-label="Основная навигация">
+    <div class="sidebar-header">
+      <span class="sidebar-leaf" aria-hidden="true">🌿</span>
+      <span class="sidebar-title">Мой зелёный<br>уголок</span>
     </div>
-    <ul class="drawer-nav">
-      <li><button class="drawer-link active" data-screen="home">Главная</button></li>
-      <li><button class="drawer-link" data-screen="catalog">Энциклопедия</button></li>
-      <li><button class="drawer-link" data-screen="garden">Мой сад</button></li>
-      <li><button class="drawer-link" data-screen="tasks">Задачи</button></li>
-      <li><button class="drawer-link" data-screen="settings">Настройки</button></li>
+    <ul class="sidebar-nav">
+      <li><button class="sidebar-link active" data-screen="home"><span class="sidebar-icon">🏠</span>Главная</button></li>
+      <li><button class="sidebar-link" data-screen="catalog"><span class="sidebar-icon">📖</span>Энциклопедия</button></li>
+      <li><button class="sidebar-link" data-screen="garden"><span class="sidebar-icon">🪴</span>Мой сад</button></li>
+      <li><button class="sidebar-link" data-screen="tasks"><span class="sidebar-icon">✅</span>Задачи</button></li>
+      <li><button class="sidebar-link" data-screen="settings"><span class="sidebar-icon">⚙️</span>Настройки</button></li>
     </ul>
   </nav>
- 
-  <header class="topbar">
-    <button class="burger" id="burgerBtn" aria-label="Открыть меню" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <h1 class="topbar-title">Мой зелёный уголок</h1>
-  </header>
- 
+
   <main class="app-main">
- 
+
     <section class="screen active" id="screen-home">
- 
+
       <div class="greeting-card">
         <p class="greeting-text" id="greetingText">Здравствуйте!</p>
         <div class="stats-row">
@@ -51,21 +42,23 @@
           </div>
         </div>
       </div>
- 
-      <section class="block">
-        <h2 class="block-title block-title--urgent">Срочно сегодня</h2>
-        <div class="task-list" id="urgentTasks">
-          <p class="empty-hint">Загрузка…</p>
-        </div>
-      </section>
- 
-      <section class="block">
-        <h2 class="block-title">Скоро, завтра</h2>
-        <div class="task-list" id="upcomingTasks">
-          <p class="empty-hint">Загрузка…</p>
-        </div>
-      </section>
- 
+
+      <div class="task-columns">
+        <section class="block">
+          <h2 class="block-title block-title--urgent">Срочно сегодня</h2>
+          <div class="task-list" id="urgentTasks">
+            <p class="empty-hint">Загрузка…</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">Скоро, завтра</h2>
+          <div class="task-list" id="upcomingTasks">
+            <p class="empty-hint">Загрузка…</p>
+          </div>
+        </section>
+      </div>
+
       <section class="block">
         <div class="block-header">
           <h2 class="block-title">Ваши растения</h2>
@@ -75,33 +68,32 @@
           <p class="empty-hint">Загрузка…</p>
         </div>
       </section>
- 
+
     </section>
 
     <section class="screen" id="screen-catalog">
-      <div class="stub"><span class="stub-leaf"></span><p>Энциклопедия — следующий шаг</p></div>
+      <div class="stub"><span class="stub-leaf">📖</span><p>Энциклопедия — следующий шаг</p></div>
     </section>
 
     <section class="screen" id="screen-garden">
-      <div class="stub"><span class="stub-leaf"></span><p>Мой сад — следующий шаг</p></div>
+      <div class="stub"><span class="stub-leaf">🪴</span><p>Мой сад — следующий шаг</p></div>
     </section>
- 
+
     <section class="screen" id="screen-tasks">
-      <div class="stub"><span class="stub-leaf"></span><p>Задачи — следующий шаг</p></div>
+      <div class="stub"><span class="stub-leaf">✅</span><p>Задачи — следующий шаг</p></div>
     </section>
- 
+
     <section class="screen" id="screen-settings">
-      <div class="stub"><span class="stub-leaf"></span><p>Настройки — следующий шаг</p></div>
+      <div class="stub"><span class="stub-leaf">⚙️</span><p>Настройки — следующий шаг</p></div>
     </section>
- 
+
   </main>
- 
+
   <div class="toast" id="toast"></div>
- 
+
   <script src="js/state.js"></script>
   <script src="js/api.js"></script>
   <script src="js/screens.js"></script>
-  <script src="js/menu.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>
