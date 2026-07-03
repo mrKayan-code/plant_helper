@@ -1,3 +1,6 @@
+/* ==========================================================
+   1. ПЕРЕМЕННЫЕ
+   ========================================================== */
 :root {
   --color-bg: #F2F4EC;
   --color-surface: #FFFFFF;
@@ -38,6 +41,9 @@
   --shadow-card: 0 1px 2px rgba(31, 46, 34, 0.06), 0 4px 20px rgba(31, 46, 34, 0.07);
 }
 
+/* ==========================================================
+   2. СБРОС / БАЗА
+   ========================================================== */
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
@@ -63,6 +69,9 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+/* ==========================================================
+   3. ПОСТОЯННАЯ БОКОВАЯ ПАНЕЛЬ
+   ========================================================== */
 .sidebar {
   position: fixed;
   top: 0;
@@ -121,6 +130,161 @@ button:focus-visible {
   font-weight: 600;
 }
 
+/* ==========================================================
+   КНОПКА АККАУНТА — плавающая, видна на всех экранах
+   ========================================================== */
+.account-btn {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease;
+}
+.account-btn:hover { transform: translateY(-1px); }
+.account-btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-moss-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* ==========================================================
+   МОДАЛКА АККАУНТА
+   ========================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 46, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal-backdrop[hidden] { display: none; }
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { background: var(--color-surface-sunken); color: var(--color-text); }
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+.auth-leaf { font-size: 1.6rem; }
+.auth-title { font-size: 1.3rem; font-weight: 500; }
+
+.auth-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  margin: 0 0 var(--space-4);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field { display: flex; flex-direction: column; gap: var(--space-1); }
+.field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.field-input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.field-input:focus-visible {
+  outline: 2px solid var(--color-moss-500);
+  outline-offset: 1px;
+}
+
+.auth-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.auth-submit { width: 100%; text-align: center; margin-top: var(--space-1); }
+
+.auth-toggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: var(--space-4);
+  font-size: 0.88rem;
+}
+
+/* --- Блок "Аккаунт" (для авторизованных) --- */
+.account-email {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: var(--space-2) 0 var(--space-5);
+  word-break: break-all;
+}
+
+.btn-danger-outline {
+  width: 100%;
+  text-align: center;
+  background: transparent;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+.btn-danger-outline:hover { background: rgba(168, 59, 39, 0.08); }
+
+/* ==========================================================
+   4. ОСНОВНАЯ ОБЛАСТЬ — на всю ширину, без узкой центрированной колонки
+   ========================================================== */
 .app-main {
   margin-left: var(--sidebar-width);
   padding: var(--space-6) var(--space-6) var(--space-6);
@@ -137,6 +301,7 @@ button:focus-visible {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Карточка приветствия — широкий hero-блок, не узкое окошко --- */
 .greeting-card {
   position: relative;
   overflow: hidden;
@@ -212,6 +377,7 @@ button:focus-visible {
   color: var(--color-text-muted);
 }
 
+/* --- Задачи: две колонки рядом на широком экране --- */
 .task-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -271,6 +437,7 @@ button:focus-visible {
 .task-action { font-size: 0.85rem; color: var(--color-text-muted); }
 .task-row--urgent { border-left: 3px solid var(--color-clay-600); }
 
+/* --- Плитки растений: широкая сетка, много колонок --- */
 .plant-tile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -308,6 +475,7 @@ button:focus-visible {
   text-overflow: ellipsis;
 }
 
+/* --- Заглушки нереализованных экранов --- */
 .stub {
   display: flex;
   flex-direction: column;
@@ -320,6 +488,9 @@ button:focus-visible {
 }
 .stub-leaf { font-size: 3rem; }
 
+/* ==========================================================
+   ЭНЦИКЛОПЕДИЯ
+   ========================================================== */
 
 .page-title {
   font-size: 1.7rem;
@@ -408,6 +579,7 @@ button:focus-visible {
   padding: 2px 6px;
 }
 
+/* --- Детальная карточка --- */
 .back-btn {
   font-size: 0.92rem;
   color: var(--color-moss-600);
@@ -519,6 +691,7 @@ button:focus-visible {
   color: var(--color-text-muted);
 }
 
+/* --- Toast --- */
 .toast {
   position: fixed;
   bottom: var(--space-4);
@@ -540,6 +713,9 @@ button:focus-visible {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ==========================================================
+   5. ШИРОКИЕ ЭКРАНЫ — ещё просторнее
+   ========================================================== */
 @media (min-width: 1400px) {
   :root { --sidebar-width: 300px; }
   .app-main { padding: var(--space-6) var(--space-6) var(--space-6) 80px; }

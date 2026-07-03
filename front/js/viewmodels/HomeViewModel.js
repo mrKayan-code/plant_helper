@@ -46,7 +46,10 @@ export class HomeViewModel extends EventEmitter {
           .slice(0, 4),
       };
     } catch (err) {
-      this.state = { ...this.state, loading: false, error: "Не удалось загрузить данные" };
+      const message = err.message === "Unauthorized"
+        ? "Войдите, чтобы увидеть свой сад"
+        : "Не удалось загрузить данные";
+      this.state = { ...this.state, loading: false, error: message };
       console.error(err);
     }
 

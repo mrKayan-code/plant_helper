@@ -43,6 +43,16 @@ export class HomeView {
   }
 
   render(state) {
+    if (state.error) {
+      this.els.statTotal.textContent = "–";
+      this.els.statNeedsCare.textContent = "–";
+      const msg = `<p class="empty-hint">${state.error}</p>`;
+      this.els.urgent.innerHTML = msg;
+      this.els.upcoming.innerHTML = "";
+      this.els.recent.innerHTML = msg;
+      return;
+    }
+
     this.els.statTotal.textContent = state.loading ? "–" : state.totalPlants;
     this.els.statNeedsCare.textContent = state.loading ? "–" : state.plantsNeedingCare;
 

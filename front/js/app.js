@@ -2,9 +2,11 @@
 import { ServiceContainer } from "./services/ServiceContainer.js";
 import { Router } from "./core/Router.js";
 
+import { AuthViewModel } from "./viewmodels/AuthViewModel.js";
 import { HomeViewModel } from "./viewmodels/HomeViewModel.js";
 import { CatalogViewModel } from "./viewmodels/CatalogViewModel.js";
 
+import { AccountView } from "./views/AccountView.js";
 import { HomeView } from "./views/HomeView.js";
 import { CatalogView } from "./views/CatalogView.js";
 
@@ -16,12 +18,32 @@ import { CatalogView } from "./views/CatalogView.js";
 const container = new ServiceContainer();
 const router = new Router();
 
-// Если токен протух в любом месте приложения — возвращаемся на главную
-// (отдельного экрана логина пока нет, появится вместе с реальным /auth).
-container.onUnauthorized = () => router.show("home");
+const authViewModel = new AuthViewModel(container.authService, container.tokenStorage);
+
+// Если токен протух при попытке защищённого запроса — тихо разлогиниваем
+// (кнопка вернётся в состояние "Войти"), но модалку НЕ открываем сами:
+// это должно быть решением пользователя, а не принудительным попапом на
+// каждой фоновой загрузке данных (иначе теряется весь смысл отказа от
+// блокирующих ворот).
+container.onUnauthorized = () => authViewModel.logout();
+
+new AccountView(authViewModel);
 
 const homeViewModel = new HomeViewModel(container.collectionService, container.remindersService);
 router.register("home", new HomeView(homeViewModel));
+
+// HomeViewModel обновляется только при показе экрана (onShow). Если человек
+// уже находится на Главной и логинится/разлогинивается через модалку —
+// экран сам об этом не узнает. Поэтому дополнительно перезагружаем данные
+// при каждой смене статуса авторизации (но не при каждом открытии/закрытии
+// модалки — для этого сравниваем с предыдущим значением isAuthenticated).
+let wasAuthenticated = authViewModel.state.isAuthenticated;
+authViewModel.on("change", (state) => {
+  if (state.isAuthenticated !== wasAuthenticated) {
+    wasAuthenticated = state.isAuthenticated;
+    homeViewModel.load();
+  }
+});
 
 const catalogViewModel = new CatalogViewModel(
   container.plantsService,
@@ -31,5 +53,6 @@ const catalogViewModel = new CatalogViewModel(
 );
 router.register("catalog", new CatalogView(catalogViewModel));
 
-// Экран по умолчанию.
+// Приложение больше не блокируется до входа — справочник и общая
+// навигация доступны сразу, экран по умолчанию — Главная.
 router.show("home");

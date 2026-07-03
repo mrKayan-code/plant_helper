@@ -11,6 +11,7 @@
 </head>
 <body>
 
+  <!-- Постоянная боковая панель (не выезжающая — десктоп, мобильная версия не нужна) -->
   <nav class="sidebar" aria-label="Основная навигация">
     <div class="sidebar-header">
       <span class="sidebar-leaf" aria-hidden="true"></span>
@@ -25,8 +26,56 @@
     </ul>
   </nav>
 
+  <!-- Кнопка аккаунта — видна на всех экранах, не блокирует доступ к сайту -->
+  <button class="account-btn" id="accountBtn">
+    <span class="account-btn-icon" aria-hidden="true">👤</span>
+    <span id="accountBtnLabel">Войти</span>
+  </button>
+
+  <!-- Модалка входа/регистрации/аккаунта -->
+  <div class="modal-backdrop" id="accountModalBackdrop" hidden>
+    <div class="modal-card">
+      <button class="modal-close" id="accountModalClose" aria-label="Закрыть">×</button>
+
+      <!-- Показывается, если НЕ авторизован -->
+      <div id="authFormBlock">
+        <div class="auth-brand">
+          <span class="auth-leaf" aria-hidden="true"></span>
+          <h2 class="auth-title">Мой зелёный уголок</h2>
+        </div>
+        <p class="auth-subtitle" id="authSubtitle">Войдите, чтобы продолжить</p>
+
+        <form class="auth-form" id="authForm">
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input type="email" id="authEmail" class="field-input" required autocomplete="email">
+          </label>
+          <label class="field">
+            <span class="field-label">Пароль</span>
+            <input type="password" id="authPassword" class="field-input" required minlength="6" autocomplete="current-password">
+          </label>
+          <p class="auth-error" id="authError" hidden></p>
+          <button type="submit" class="btn-primary auth-submit" id="authSubmitBtn">Войти</button>
+        </form>
+
+        <button class="link-btn auth-toggle" id="authToggleBtn">Нет аккаунта? Зарегистрироваться</button>
+      </div>
+
+      <!-- Показывается, если авторизован -->
+      <div id="accountInfoBlock" hidden>
+        <div class="auth-brand">
+          <span class="auth-leaf" aria-hidden="true"></span>
+          <h2 class="auth-title">Аккаунт</h2>
+        </div>
+        <p class="account-email" id="accountEmail"></p>
+        <button class="btn-danger-outline" id="logoutBtn">Выйти</button>
+      </div>
+    </div>
+  </div>
+
   <main class="app-main">
 
+    <!-- ЭКРАН: Главная -->
     <section class="screen active" id="screen-home">
 
       <div class="greeting-card">
@@ -71,8 +120,10 @@
 
     </section>
 
+    <!-- ЭКРАН: Энциклопедия -->
     <section class="screen" id="screen-catalog">
 
+      <!-- Подэкран 1: список справочника -->
       <div class="catalog-view" id="catalogListView">
         <div class="catalog-header">
           <h2 class="page-title">Энциклопедия растений</h2>
@@ -93,23 +144,28 @@
         </div>
       </div>
 
+      <!-- Подэкран 2: детальная карточка растения (скрыт по умолчанию) -->
       <div class="catalog-view" id="catalogDetailView" hidden>
         <button class="back-btn" id="catalogBackBtn">← Назад к энциклопедии</button>
 
         <div class="detail-card" id="catalogDetailCard">
+          <!-- наполняется через catalog.js -->
         </div>
       </div>
 
     </section>
 
+    <!-- ЭКРАН: Мой сад (заглушка) -->
     <section class="screen" id="screen-garden">
       <div class="stub"><span class="stub-leaf"></span><p>Мой сад — следующий шаг</p></div>
     </section>
 
+    <!-- ЭКРАН: Задачи (заглушка) -->
     <section class="screen" id="screen-tasks">
       <div class="stub"><span class="stub-leaf"></span><p>Задачи — следующий шаг</p></div>
     </section>
 
+    <!-- ЭКРАН: Настройки (заглушка) -->
     <section class="screen" id="screen-settings">
       <div class="stub"><span class="stub-leaf"></span><p>Настройки — следующий шаг</p></div>
     </section>
