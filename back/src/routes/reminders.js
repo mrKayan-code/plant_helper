@@ -7,32 +7,30 @@ const router = Router();
 router.use(requireAuth);
 
 // Дата в формате YYYY-MM-DD (строки такого вида сравниваются лексикографически = хронологически)
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
 function addDays(dateStr, days) {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
 
-// Одно действие → элемент напоминания, если оно "пора" (due <= завтра).
-function buildReminder(item, action, lastDate, interval, horizon) {
+// Одно действие → следующая дата ухода (или null, если посчитать нельзя).
+// Окном НЕ ограничиваем: отдаём всё расписание, фронт сам раскладывает
+// по бакетам "сегодня / завтра / все" (см. TasksViewModel).
+function buildReminder(item, action, lastDate, interval) {
   if (!lastDate || !interval) return null; // нет даты/интервала — посчитать нельзя
-  const due = addDays(lastDate, interval);
-  if (due > horizon) return null;          // ещё рано
   return {
     collectionId: item.id,
     plantId: item.plant.id,
     name: item.plant.name,
     action,
-    dueDate: due,
+    dueDate: addDays(lastDate, interval),
   };
 }
 
-// GET /api/reminders — что пора полить/пересадить по личному списку (до завтра включительно)
+// GET /api/reminders — полное расписание ухода по личному списку.
+// Для каждого растения: следующий полив и следующая пересадка (dueDate).
+// Просрочённые приходят с dueDate в прошлом — фронт покажет их как "срочные".
 router.get('/', (req, res) => {
-  const horizon = addDays(today(), 1); // сегодня + 1: покрывает "срочно сегодня" и "скоро завтра"
   const items = collectionRepo.findByUser(req.userId).map(serializeCollectionItem);
 
   const reminders = [];
@@ -41,10 +39,10 @@ router.get('/', (req, res) => {
     const waterInterval = item.waterIntervalDays ?? item.plant.waterIntervalDays;
     const repotInterval = item.repotIntervalDays ?? item.plant.repotIntervalDays;
 
-    const water = buildReminder(item, 'water', item.lastWateredAt, waterInterval, horizon);
+    const water = buildReminder(item, 'water', item.lastWateredAt, waterInterval);
     if (water) reminders.push(water);
 
-    const repot = buildReminder(item, 'repot', item.lastRepottedAt, repotInterval, horizon);
+    const repot = buildReminder(item, 'repot', item.lastRepottedAt, repotInterval);
     if (repot) reminders.push(repot);
   }
 
