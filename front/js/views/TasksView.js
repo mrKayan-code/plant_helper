@@ -1,5 +1,3 @@
-// js/views/TasksView.js
-
 const ACTION_ICON = { water: "💧", repot: "🪴" };
 const ACTION_LABEL = { water: "Полить", repot: "Пересадить" };
 
@@ -12,6 +10,7 @@ export class TasksView {
       urgentSection: document.getElementById("tasksUrgentSection"),
       urgentList: document.getElementById("tasksUrgentList"),
       upcomingSection: document.getElementById("tasksUpcomingSection"),
+      upcomingTitle: document.getElementById("tasksUpcomingTitle"),
       upcomingList: document.getElementById("tasksUpcomingList"),
       completedSection: document.getElementById("tasksCompletedSection"),
       completedList: document.getElementById("tasksCompletedList"),
@@ -50,7 +49,12 @@ export class TasksView {
     }
 
     this.renderList(this.els.urgentList, state.urgent, state, "Срочных задач нет 🌿");
-    this.renderList(this.els.upcomingList, state.upcoming, state, "На завтра ничего не запланировано");
+    const upcomingData = state.filter === "tomorrow" ? state.tomorrow : state.upcoming;
+    const upcomingEmptyText = state.filter === "tomorrow"
+      ? "На завтра ничего не запланировано"
+      : "Предстоящих задач нет";
+    this.els.upcomingTitle.textContent = state.filter === "tomorrow" ? "Скоро" : "Все предстоящие задачи";
+    this.renderList(this.els.upcomingList, upcomingData, state, upcomingEmptyText);
 
     this.els.completedSection.hidden = state.completedToday.length === 0;
     this.renderCompleted(state.completedToday);

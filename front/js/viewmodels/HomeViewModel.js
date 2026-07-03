@@ -1,10 +1,6 @@
-// js/viewmodels/HomeViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
-import { todayISO } from "../utils/dateUtils.js";
+import { todayISO, addDaysISO } from "../utils/dateUtils.js";
 
-// ViewModel Главного экрана. Не импортирует ничего связанного с DOM —
-// только сервисы (через конструктор) и чистую бизнес-логику.
-// View подписывается на "change" и решает, как это нарисовать.
 export class HomeViewModel extends EventEmitter {
   constructor(collectionService, remindersService) {
     super();
@@ -33,14 +29,17 @@ export class HomeViewModel extends EventEmitter {
       ]);
 
       const today = todayISO();
+      const tomorrow = addDaysISO(today, 1);
 
       this.state = {
         loading: false,
         error: null,
         totalPlants: collection.length,
-        plantsNeedingCare: new Set(reminders.map((r) => r.collectionId)).size,
+        plantsNeedingCare: new Set(
+          reminders.filter((r) => r.dueDate <= today).map((r) => r.collectionId)
+        ).size,
         urgentTasks: reminders.filter((r) => r.dueDate <= today),
-        upcomingTasks: reminders.filter((r) => r.dueDate > today),
+        upcomingTasks: reminders.filter((r) => r.dueDate === tomorrow),
         recentPlants: [...collection]
           .sort((a, b) => (a.addedAt < b.addedAt ? 1 : -1))
           .slice(0, 4),

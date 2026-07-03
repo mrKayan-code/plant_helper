@@ -1,13 +1,6 @@
-// js/viewmodels/TasksViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
-import { todayISO } from "../utils/dateUtils.js";
+import { todayISO, addDaysISO } from "../utils/dateUtils.js";
 
-// ViewModel экрана "Задачи". Срочные/предстоящие задачи берём из
-// remindersService (та же абстракция, что уже используется на Главной —
-// сейчас мок, при готовности бэка станет реальным без правок здесь).
-// "Выполнено сегодня" бэк не хранит (нет истории действий), поэтому это
-// чисто сессионный список на фронте — пропадает при перезагрузке страницы,
-// это осознанное решение, не баг.
 export class TasksViewModel extends EventEmitter {
   constructor(remindersService, collectionService, notifier) {
     super();
@@ -16,13 +9,13 @@ export class TasksViewModel extends EventEmitter {
     this.notifier = notifier;
 
     this.state = {
-      filter: "all", // "today" | "tomorrow" | "all"
+      filter: "all", 
       loading: true,
       error: null,
-      urgent: [],   // Reminder[] — due <= сегодня
-      upcoming: [], // Reminder[] — due завтра
-      completedToday: [], // { name, action }[] — только в рамках этой сессии
-      completingKey: null, // "<collectionId>:<action>" — что сейчас отмечается
+      urgent: [], 
+      tomorrow: [],
+      upcoming: [], 
+      completingKey: null, 
     };
   }
 
@@ -33,12 +26,14 @@ export class TasksViewModel extends EventEmitter {
     try {
       const reminders = await this.remindersService.getAll();
       const today = todayISO();
+      const tomorrow = addDaysISO(today, 1);
 
       this.state = {
         ...this.state,
         loading: false,
-        urgent: reminders.filter((r) => r.dueDate <= today),
-        upcoming: reminders.filter((r) => r.dueDate > today),
+        urgent: reminders.filter((r) => r.dueDate <= today), 
+        tomorrow: reminders.filter((r) => r.dueDate === tomorrow),
+        upcoming: reminders.filter((r) => r.dueDate > today), 
       };
     } catch (err) {
       const message = err.message === "Unauthorized"

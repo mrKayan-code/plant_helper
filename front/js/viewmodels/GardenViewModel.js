@@ -1,11 +1,6 @@
-// js/viewmodels/GardenViewModel.js
 import { EventEmitter } from "../core/EventEmitter.js";
 import { todayISO, addDaysISO, daysBetweenISO } from "../utils/dateUtils.js";
 
-// ViewModel экрана "Мой сад". После любого мутирующего действия (сохранить,
-// удалить, полить, пересадить) просто перезагружаем весь список из
-// источника правды через load() — это чуть дороже по сети, чем точечно
-// патчить локальный массив, но полностью исключает рассинхрон состояния.
 export class GardenViewModel extends EventEmitter {
   constructor(collectionService, favoritesService, notifier) {
     super();
@@ -14,7 +9,7 @@ export class GardenViewModel extends EventEmitter {
     this.notifier = notifier;
 
     this.state = {
-      viewMode: "grid", // "grid" | "list"
+      viewMode: "grid",
       loading: true,
       error: null,
       items: [],
@@ -63,8 +58,6 @@ export class GardenViewModel extends EventEmitter {
     this.emit("change", this.state);
   }
 
-  // Фильтрация — чистая функция над уже загруженными данными, отдельного
-  // запроса не делает (коллекция обычно небольшая).
   getVisibleItems() {
     const q = this.state.query.trim().toLowerCase();
     if (!q) return this.state.items;
@@ -75,15 +68,6 @@ export class GardenViewModel extends EventEmitter {
     return this.state.favoriteIds.has(plantId);
   }
 
-  // Считает точный статус ухода по одному растению: сколько дней осталось
-  // до полива/пересадки (или на сколько дней просрочено). Это сердце
-  // механики "когда нужен полив" — единственное место, где она вычисляется.
-  //
-  // tracked: false — действие ни разу не отмечали (нет даты) или для него
-  //   не задан интервал (ни в collection, ни в справочнике) — посчитать нечего.
-  // daysLeft > 0  — сколько дней остаётся.
-  // daysLeft === 0 — нужно делать сегодня.
-  // daysLeft < 0  — просрочено на |daysLeft| дней.
   getCareStatus(item) {
     return {
       water: this._computeStatus(item.lastWateredAt, item.waterIntervalDays ?? item.plant.waterIntervalDays),
@@ -92,7 +76,7 @@ export class GardenViewModel extends EventEmitter {
   }
 
   _computeStatus(lastDateISO, intervalDays) {
-    if (!lastDateISO || !intervalDays) {
+    if (!lastDateISO || intervalDays === null || intervalDays === undefined) {
       return { tracked: false, daysLeft: null };
     }
     const dueDate = addDaysISO(lastDateISO, intervalDays);
