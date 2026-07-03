@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 // Файл БД лежит в back/data/plant_helper.db
 const DB_PATH = join(import.meta.dirname, '..', 'data', 'plant_helper.db');
@@ -57,5 +58,33 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_collection_user ON collection(user_id);
   CREATE INDEX IF NOT EXISTS idx_favorites_user  ON favorites(user_id);
 `);
+
+// --- Seed справочника: заливаем, только если таблица plants пустая ---
+const { count } = db.prepare('SELECT COUNT(*) AS count FROM plants').get();
+if (count === 0) {
+  const seedPath = join(import.meta.dirname, '..', 'data', 'seed-plants.json');
+  const plants = JSON.parse(readFileSync(seedPath, 'utf8'));
+
+  const insert = db.prepare(`
+    INSERT INTO plants
+      (name, watering, light, repotting, toxicity, notes,
+       water_interval_days, repot_interval_days, image_url)
+    VALUES
+      (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  // Транзакция: все вставки разом, быстрее и атомарно
+  db.exec('BEGIN');
+  for (const p of plants) {
+    insert.run(
+      p.name, p.watering ?? null, p.light ?? null, p.repotting ?? null,
+      p.toxicity ?? null, p.notes ?? null,
+      p.waterIntervalDays ?? null, p.repotIntervalDays ?? null, p.imageUrl ?? null,
+    );
+  }
+  db.exec('COMMIT');
+
+  console.log(`Справочник заполнен: ${plants.length} растений`);
+}
 
 console.log('БД инициализирована:', DB_PATH);
