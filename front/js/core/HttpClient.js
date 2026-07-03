@@ -1,8 +1,3 @@
-// js/core/HttpClient.js
-// Единственная ответственность: HTTP-транспорт. Не знает, что такое
-// "растение" или "коллекция" — это уровень сервисов выше. Здесь только
-// fetch, заголовки авторизации и единообразный разбор ошибок (SRP).
-
 export class HttpClient {
   constructor(baseUrl, tokenStorage, notifier, onUnauthorized) {
     this.baseUrl = baseUrl;
@@ -13,8 +8,6 @@ export class HttpClient {
 
   async request(path, { method = "GET", body } = {}) {
     const headers = {};
-    // Content-Type ставим только когда реально есть тело — иначе браузер
-    // на пустом GET шлёт лишний CORS-preflight (OPTIONS).
     if (body) headers["Content-Type"] = "application/json";
 
     const token = this.tokenStorage.get();

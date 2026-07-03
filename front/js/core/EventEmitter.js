@@ -1,8 +1,3 @@
-// js/core/EventEmitter.js
-// Минимальная шина событий. ViewModel наследуется от неё и через emit()
-// сообщает View "состояние изменилось" — View сама решает, что перерисовать.
-// Это и есть биндинг в MVVM без фреймворка.
-
 export class EventEmitter {
   #listeners = new Map();
 

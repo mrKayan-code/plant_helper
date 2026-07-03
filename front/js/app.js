@@ -26,7 +26,6 @@ container.onUnauthorized = () => authViewModel.logout();
 new AccountView(authViewModel);
 authViewModel.init();
 
-// Общая форма подтверждения ухода — один экземпляр на всё приложение.
 const careConfirmViewModel = new CareConfirmViewModel(container.collectionStore, container.notifier);
 new CareConfirmView(careConfirmViewModel);
 
@@ -57,8 +56,6 @@ const tasksViewModel = new TasksViewModel(
 );
 router.register("tasks", new TasksView(tasksViewModel));
 
-// Смена аккаунта: грузим/чистим ТОЛЬКО сторы — все экраны подписаны на них
-// и обновятся сами. Ничего не забудешь дописать при добавлении экрана.
 let wasAuthenticated = authViewModel.state.isAuthenticated;
 authViewModel.on("change", (state) => {
   if (state.isAuthenticated === wasAuthenticated) return;

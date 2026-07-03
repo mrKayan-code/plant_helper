@@ -1,5 +1,3 @@
-// Общая модалка подтверждения ухода. Одна на всё приложение (как AccountView).
-// Только DOM: читает состояние из CareConfirmViewModel, шлёт confirm/cancel.
 export class CareConfirmView {
   constructor(viewModel) {
     this.vm = viewModel;

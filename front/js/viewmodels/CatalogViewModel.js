@@ -1,9 +1,5 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 
-// ViewModel энциклопедии. Справочник (plants) — read-only, тянется из
-// plantsService. Избранное и добавление в сад — через сторы (единый
-// источник правды), поэтому звёздочки всегда синхронны с "Мой сад",
-// а добавленное растение сразу появляется в саду без ручных перезагрузок.
 export class CatalogViewModel extends EventEmitter {
   constructor(plantsService, favoritesStore, collectionStore, notifier) {
     super();
@@ -18,15 +14,13 @@ export class CatalogViewModel extends EventEmitter {
       loading: true,
       error: null,
       plants: [],
-      query: "",
+      query: "", //поиск
       favoriteIds: new Set(this.favoritesStore.ids),
       selectedPlant: null,
       addingToGarden: false,
       addedToGarden: false,
     };
 
-    // Избранное приходит из стора — подписка держит звёздочки актуальными
-    // (в т.ч. если избранное поменяли в "Мой сад" или сменили аккаунт).
     this.favoritesStore.on("change", (ids) => {
       this.state = { ...this.state, favoriteIds: new Set(ids) };
       this.emit("change", this.state);
@@ -38,7 +32,6 @@ export class CatalogViewModel extends EventEmitter {
     await this.search(this.state.query);
   }
 
-  // Делегирует стору; оставлен, чтобы CatalogView.onShow не менять.
   async reloadFavorites() {
     try {
       await this.favoritesStore.load();
@@ -96,7 +89,7 @@ export class CatalogViewModel extends EventEmitter {
   async toggleFavorite(plantId) {
     const isFav = this.isFavorite(plantId);
     try {
-      await this.favoritesStore.toggle(plantId); // стор сам разошлёт "change"
+      await this.favoritesStore.toggle(plantId);
       this.notifier.show(isFav ? "Убрано из избранного" : "Добавлено в избранное");
     } catch (err) {
       console.error(err);
@@ -111,7 +104,7 @@ export class CatalogViewModel extends EventEmitter {
     this.emit("change", this.state);
 
     try {
-      await this.collectionStore.add({ plantId: plant.id }); // появится в "Мой сад" автоматически
+      await this.collectionStore.add({ plantId: plant.id }); 
       this.state.addedToGarden = true;
       this.notifier.show(`«${plant.name}» добавлено в мой сад`);
     } catch (err) {

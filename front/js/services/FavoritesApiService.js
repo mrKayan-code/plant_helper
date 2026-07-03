@@ -1,4 +1,3 @@
-// js/services/FavoritesApiService.js
 import { Plant } from "../models/Plant.js";
 
 export class FavoritesApiService {

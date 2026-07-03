@@ -1,10 +1,6 @@
 import { EventEmitter } from "../core/EventEmitter.js";
 import { todayISO, addDaysISO } from "../utils/dateUtils.js";
 
-// ViewModel Главного экрана. Не хранит свою копию данных — читает из
-// collectionStore / remindersStore и пересчитывает представление по их
-// "change". Полил растение из любого экрана → сторы обновились → Главная
-// пересчиталась сама, без ручных перезагрузок.
 export class HomeViewModel extends EventEmitter {
   constructor(collectionStore, remindersStore) {
     super();
@@ -31,7 +27,6 @@ export class HomeViewModel extends EventEmitter {
 
     try {
       await Promise.all([this.collectionStore.load(), this.remindersStore.load()]);
-      // сторы разошлют "change" → recompute() соберёт состояние
     } catch (err) {
       const message = err.message === "Unauthorized"
         ? "Войдите, чтобы увидеть свой сад"
@@ -42,7 +37,6 @@ export class HomeViewModel extends EventEmitter {
     }
   }
 
-  // Чистый пересчёт представления из текущих данных сторов.
   recompute() {
     const collection = this.collectionStore.items;
     const reminders = this.remindersStore.items;

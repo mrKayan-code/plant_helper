@@ -31,7 +31,6 @@ export class AccountView {
     this.els.btn.addEventListener("click", () => this.vm.openModal());
     this.els.closeBtn.addEventListener("click", () => this.vm.closeModal());
 
-    // клик по затемнённому фону (не по самой карточке) тоже закрывает модалку
     this.els.backdrop.addEventListener("click", (e) => {
       if (e.target === this.els.backdrop) this.vm.closeModal();
     });

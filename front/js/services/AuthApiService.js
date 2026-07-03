@@ -1,5 +1,3 @@
-// js/services/AuthApiService.js
-
 export class AuthApiService {
   constructor(httpClient, tokenStorage) {
     this.http = httpClient;

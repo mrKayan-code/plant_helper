@@ -1,7 +1,3 @@
-// js/utils/pluralize.js
-// Склонение существительных после числительных (русский язык):
-// 1 день, 2 дня, 5 дней, 21 день...
-
 export function pluralize(n, one, few, many) {
   const abs = Math.abs(n) % 100;
   const last = abs % 10;
