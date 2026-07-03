@@ -181,6 +181,7 @@ favorites (
 [
   {
     "id": 1,
+    "slug": "monstera",
     "name": "Монстера",
     "watering": "Раз в 5–7 дней, когда верхний слой подсох",
     "light": "Яркий рассеянный свет",
@@ -189,10 +190,13 @@ favorites (
     "notes": "Любит опрыскивание",
     "waterIntervalDays": 7,
     "repotIntervalDays": 365,
-    "imageUrl": "https://..."
+    "imageUrl": "http://localhost:3000/assets/plants/monstera.jpg"
   }
 ]
 ```
+
+- `slug` — стабильный ключ растения (не меняется при пересеве каталога).
+- `imageUrl` — **абсолютный URL на бэк** (он раздаёт картинки статикой из `/assets`). Фронт вставляет в `<img src>` как есть.
 
 `GET /api/plants/:id` → `200` один объект той же формы; `404` если нет.
 
