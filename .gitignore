@@ -1,5 +1,5 @@
 .claude/
 node_modules/
-data/*.db
+*.db
 .env
 
