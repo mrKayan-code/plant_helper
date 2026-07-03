@@ -1,21 +1,16 @@
-/* ==========================================================
-   1. ПЕРЕМЕННЫЕ
-   ========================================================== */
 :root {
-  /* Палитра: мох / земля / глина горшка — вместо дежурного
-     кремово-терракотового или чёрно-неонового набора */
   --color-bg: #F2F4EC;
   --color-surface: #FFFFFF;
   --color-surface-sunken: #EAEEE1;
 
-  --color-moss-900: #1F2E22;   /* основной текст */
+  --color-moss-900: #1F2E22;
   --color-moss-700: #33502F;
-  --color-moss-600: #3F6B4A;   /* основной акцент */
+  --color-moss-600: #3F6B4A;
   --color-moss-500: #557A55;
   --color-moss-300: #9FB79A;
   --color-moss-100: #DCE6D6;
 
-  --color-clay-600: #B96A44;   /* тёплый акцент — глина горшка, срочность */
+  --color-clay-600: #B96A44;
   --color-clay-100: #F3E1D4;
 
   --color-text: var(--color-moss-900);
@@ -31,18 +26,18 @@
   --space-2: 8px;
   --space-3: 16px;
   --space-4: 24px;
-  --space-5: 36px;
+  --space-5: 40px;
+  --space-6: 64px;
+
+  --sidebar-width: 264px;
 
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 
-  --shadow-card: 0 1px 2px rgba(31, 46, 34, 0.06), 0 4px 16px rgba(31, 46, 34, 0.06);
+  --shadow-card: 0 1px 2px rgba(31, 46, 34, 0.06), 0 4px 20px rgba(31, 46, 34, 0.07);
 }
 
-/* ==========================================================
-   2. СБРОС / БАЗА
-   ========================================================== */
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
@@ -63,89 +58,42 @@ button {
   background: none;
   color: inherit;
 }
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--color-moss-600);
+button:focus-visible {
+  outline: 2px solid var(--color-moss-500);
   outline-offset: 2px;
 }
 
-/* ==========================================================
-   3. ОБЩИЕ КОМПОНЕНТЫ
-   ========================================================== */
-
-/* --- Верхняя полоса --- */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.topbar-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.burger {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-.burger span {
-  display: block;
-  width: 100%;
-  height: 2px;
-  background: var(--color-moss-900);
-  border-radius: 2px;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* --- Выезжающая панель меню --- */
-.drawer {
+.sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  height: 100%;
-  width: min(78vw, 300px);
+  bottom: 0;
+  width: var(--sidebar-width);
   background: var(--color-moss-900);
   color: var(--color-moss-100);
-  z-index: 30;
-  transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: var(--space-4) var(--space-3);
   display: flex;
   flex-direction: column;
+  padding: var(--space-5) var(--space-3) var(--space-4);
+  z-index: 10;
 }
-.drawer.open { transform: translateX(0); }
 
-.drawer-header {
+.sidebar-header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-2) var(--space-4);
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-5);
 }
-.drawer-leaf { font-size: 1.4rem; }
-.drawer-title {
+.sidebar-leaf { font-size: 1.7rem; line-height: 1; }
+.sidebar-title {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
   color: #fff;
+  line-height: 1.2;
 }
 
-.drawer-nav {
+.sidebar-nav {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -153,96 +101,126 @@ a:focus-visible {
   flex-direction: column;
   gap: var(--space-1);
 }
-.drawer-link {
+.sidebar-link {
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   text-align: left;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-3) var(--space-3);
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: 0.98rem;
   color: var(--color-moss-100);
   transition: background 0.15s ease;
 }
-.drawer-link:hover { background: rgba(255,255,255,0.06); }
-.drawer-link.active {
+.sidebar-icon { font-size: 1.1rem; }
+.sidebar-link:hover { background: rgba(255,255,255,0.07); }
+.sidebar-link.active {
   background: var(--color-moss-600);
   color: #fff;
   font-weight: 600;
 }
 
-.drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(31, 46, 34, 0.45);
-  z-index: 20;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-.drawer-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* --- Основная область --- */
 .app-main {
-  padding: var(--space-4) var(--space-3) var(--space-5);
-  max-width: 720px;
-  margin: 0 auto;
+  margin-left: var(--sidebar-width);
+  padding: var(--space-6) var(--space-6) var(--space-6);
+  min-height: 100vh;
 }
 
 .screen { display: none; }
-.screen.active { display: block; }
+.screen.active {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-/* --- Карточка приветствия + статистика --- */
 .greeting-card {
+  position: relative;
+  overflow: hidden;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  padding: var(--space-5) var(--space-6);
   box-shadow: var(--shadow-card);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.greeting-card::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
+  background: var(--color-moss-100);
+  border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%;
+  z-index: 0;
+}
+.greeting-card::after {
+  content: "";
+  position: absolute;
+  bottom: -90px;
+  right: 140px;
+  width: 180px;
+  height: 180px;
+  background: var(--color-clay-100);
+  border-radius: 55% 45% 40% 60% / 50% 55% 45% 50%;
+  z-index: 0;
 }
 
 .greeting-text {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 2rem;
   font-weight: 500;
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-4);
   color: var(--color-moss-900);
 }
 
 .stats-row {
+  position: relative;
+  z-index: 1;
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
-/* Органичная "капле-подобная" форма — сигнатурный элемент экрана */
 .stat-blob {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   background: var(--color-moss-100);
   border-radius: 40% 60% 55% 45% / 50% 45% 55% 50%;
+  min-width: 190px;
 }
 .stat-blob--warm { background: var(--color-clay-100); }
 
 .stat-number {
   font-family: var(--font-mono);
-  font-size: 1.6rem;
+  font-size: 2.4rem;
   font-weight: 500;
   color: var(--color-moss-700);
+  line-height: 1;
 }
 .stat-blob--warm .stat-number { color: var(--color-clay-600); }
 
 .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
 }
 
-/* --- Блоки со списками --- */
-.block { margin-bottom: var(--space-4); }
+.task-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.block { margin-bottom: var(--space-5); }
+.task-columns .block { margin-bottom: 0; }
 
 .block-header {
   display: flex;
@@ -251,17 +229,17 @@ a:focus-visible {
 }
 
 .block-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: var(--space-2);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
 }
 .block-title--urgent { color: var(--color-clay-600); }
 
 .link-btn {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-moss-600);
   font-weight: 500;
 }
@@ -269,11 +247,10 @@ a:focus-visible {
 
 .empty-hint {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   padding: var(--space-2) 0;
 }
 
-/* --- Строка задачи --- */
 .task-list { display: flex; flex-direction: column; gap: var(--space-2); }
 
 .task-row {
@@ -282,23 +259,22 @@ a:focus-visible {
   gap: var(--space-3);
   background: var(--color-surface);
   border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease;
 }
+.task-row:hover { transform: translateY(-1px); }
 
-.task-icon { font-size: 1.3rem; flex-shrink: 0; }
-
+.task-icon { font-size: 1.4rem; flex-shrink: 0; }
 .task-info { flex: 1; min-width: 0; }
-.task-plant-name { font-weight: 600; font-size: 0.95rem; }
-.task-action { font-size: 0.82rem; color: var(--color-text-muted); }
-
+.task-plant-name { font-weight: 600; font-size: 1rem; }
+.task-action { font-size: 0.85rem; color: var(--color-text-muted); }
 .task-row--urgent { border-left: 3px solid var(--color-clay-600); }
 
-/* --- Плитки растений --- */
 .plant-tile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
 }
 
 .plant-tile {
@@ -306,20 +282,25 @@ a:focus-visible {
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.plant-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(31,46,34,0.08), 0 10px 28px rgba(31,46,34,0.10);
 }
 
 .plant-tile-img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   background: var(--color-surface-sunken);
   display: block;
 }
 
-.plant-tile-body { padding: var(--space-2) var(--space-3) var(--space-3); }
-.plant-tile-name { font-weight: 600; font-size: 0.9rem; }
+.plant-tile-body { padding: var(--space-3) var(--space-4) var(--space-4); }
+.plant-tile-name { font-weight: 600; font-size: 1rem; }
 .plant-tile-note {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--color-text-muted);
   margin-top: 2px;
   white-space: nowrap;
@@ -327,30 +308,28 @@ a:focus-visible {
   text-overflow: ellipsis;
 }
 
-/* --- Заглушки нереализованных экранов --- */
 .stub {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-5) var(--space-3);
+  gap: var(--space-3);
+  min-height: 60vh;
   color: var(--color-text-muted);
   text-align: center;
 }
-.stub-leaf { font-size: 2rem; }
+.stub-leaf { font-size: 3rem; }
 
-/* --- Toast --- */
 .toast {
   position: fixed;
   bottom: var(--space-4);
-  left: 50%;
+  left: calc(50% + var(--sidebar-width) / 2);
   transform: translateX(-50%) translateY(20px);
   background: var(--color-moss-900);
   color: #fff;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
@@ -362,10 +341,8 @@ a:focus-visible {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ==========================================================
-   4. АДАПТИВ
-   ========================================================== */
-@media (min-width: 640px) {
-  .app-main { padding-top: var(--space-5); }
-  .plant-tile-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+@media (min-width: 1400px) {
+  :root { --sidebar-width: 300px; }
+  .app-main { padding: var(--space-6) var(--space-6) var(--space-6) 80px; }
+  .plant-tile-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 }
