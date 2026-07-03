@@ -31,6 +31,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 0 — Инициализация проекта ✅
+
 - [x] `package.json`: `"type": "module"`, start = `node --watch --env-file=.env src/server.js`
 - [x] `yarn add express cors jsonwebtoken` (Express 5)
 - [x] `.env` (в gitignore) с рандомным `JWT_SECRET` + `PORT=3000`; `.env.example` для команды
@@ -41,6 +42,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 1 — Сервер-каркас (`src/server.js`) ✅
+
 - [x] Express + `cors()` + `express.json()`
 - [x] `GET /api/health` → `{ ok: true }`
 - [ ] Подключить роутеры (по мере готовности — заготовка в коде)
@@ -52,6 +54,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 2 — БД и схема (`src/db.js`) ✅
+
 - [x] `DatabaseSync` из `node:sqlite`, путь через `import.meta.dirname`
 - [x] `PRAGMA foreign_keys = ON`
 - [x] `CREATE TABLE IF NOT EXISTS`: `users`, `plants`, `collection`, `favorites` + FK + индексы
@@ -62,7 +65,8 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 3 — Seed справочника ✅
-- [x] `data/seed-plants.json` — 12 растений (монстера, фикус, сансевиерия, спатифиллум, замиокулькас, хлорофитум, алоэ, орхидея, кактус, драцена, герань, фиалка)
+
+- [x] `data/plants.json` — 12 растений (монстера, фикус, сансевиерия, спатифиллум, замиокулькас, хлорофитум, алоэ, орхидея, кактус, драцена, герань, фиалка)
 - [x] В `db.js`: если `plants` пуста — залить из seed (в транзакции), маппинг camelCase→snake_case
 - [x] Идемпотентно: повторный старт не дублирует
 
@@ -71,6 +75,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 4 — Справочник (`src/routes/plants.js`) — публичный ✅
+
 - [x] `GET /api/plants` (+ `?q=` поиск `WHERE name LIKE`, сортировка по name)
 - [x] `GET /api/plants/:id` (404 `{error}` если нет)
 - [x] хелпер `serialize.js` → `serializePlant` (snake_case → camelCase, переиспользуем)
@@ -81,6 +86,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 5 — Авторизация (`src/auth.js` + `src/routes/auth.js`) ✅
+
 - [x] `auth.js`: `hashPassword` / `verifyPassword` через `scryptSync` (формат `соль:хеш`, timing-safe)
 - [x] `auth.js`: `signToken(userId)` / `verifyToken(token)` через `jsonwebtoken` (TTL 7д)
 - [x] `POST /api/auth/register` — валидация email/пароля, 409 если занят, insert, `{token, user}`
@@ -93,6 +99,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 6 — Middleware защиты (`src/middleware/requireAuth.js`) ✅
+
 - [x] Достать `Authorization: Bearer <token>`, verify, положить `req.userId`
 - [x] Нет / без Bearer / битый / просроченный токен → 401 `{error}`
 - [x] `GET /api/auth/me` — пользователь по `req.userId` (401 если юзер удалён)
@@ -102,6 +109,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 7 — Личный список (`src/routes/collection.js`) — защищён ✅
+
 - [x] `GET /api/collection` — JOIN с plants, только `WHERE user_id = req.userId`
 - [x] `POST /api/collection` — `{ plantId, note?, waterIntervalDays?, repotIntervalDays? }`; 400 без plantId, 404 если растения нет
 - [x] `PATCH /api/collection/:id` — note / интервалы / даты (whitelist полей в repo)
@@ -114,6 +122,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 8 — Избранное (`src/routes/favorites.js`) — защищён
+
 - [ ] `GET /api/favorites` — JOIN с plants
 - [ ] `POST /api/favorites` — `{ plantId }` (idempotent, INSERT OR IGNORE)
 - [ ] `DELETE /api/favorites/:plantId`
@@ -123,6 +132,7 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 9 — Напоминания (`src/routes/reminders.js`) — защищён
+
 - [ ] `GET /api/reminders` — по коллекции юзера вычислить `due` (полив + пересадка):
       `effective_interval` = из collection, иначе из plants; если интервал/дата пусты — пропускаем
 - [x] ~~`/watered` и `/repotted`~~ — уже сделаны в Шаге 7
@@ -132,12 +142,14 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Шаг 10 — Стыковка с фронтом 🎯 (цель — рабочее демо)
+
 - [ ] Прогнать весь путь: register → список растений → добавить в коллекцию → напоминание → отметить полив
 - [ ] Пофиксить CORS/ошибки, которые всплывут при реальных запросах фронта
 
 ---
 
 ## Потом (усложнения, по одному, только после демо)
+
 - [ ] Обмен растениями + чат
 - [ ] Рекомендательная система
 - [ ] Распознавание по фото
@@ -145,7 +157,9 @@ db.js                — соединение с SQLite + схема + seed (sin
 ---
 
 ## Заметки / решения по ходу
+
 <!-- сюда пишем нестандартные решения, костыли, договорённости -->
+
 - node:sqlite синхронный (DatabaseSync) — async/await для БД не нужен.
 - **Именование:** в БД колонки `snake_case`, в JSON API — `camelCase` (по контракту).
   Значит в роутерах нужен маппинг при отдаче: `water_interval_days` → `waterIntervalDays`.

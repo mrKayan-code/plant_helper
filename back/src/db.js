@@ -62,7 +62,7 @@ db.exec(`
 // --- Seed справочника: заливаем, только если таблица plants пустая ---
 const { count } = db.prepare('SELECT COUNT(*) AS count FROM plants').get();
 if (count === 0) {
-  const seedPath = join(import.meta.dirname, '..', 'data', 'seed-plants.json');
+  const seedPath = join(import.meta.dirname, '..', 'data', 'plants.json');
   const plants = JSON.parse(readFileSync(seedPath, 'utf8'));
 
   const insert = db.prepare(`

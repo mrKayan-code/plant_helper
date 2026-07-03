@@ -3,12 +3,14 @@
 Node.js + Express + `node:sqlite`. API-сервер для фронта.
 
 ## Требования
+
 - **Node.js 22+** (нужен встроенный модуль `node:sqlite` и флаг `--env-file`). Проверить: `node --version`
 - Пакетменеджер: **yarn** или **npm** (что есть — оба работают)
 
 ## Первый запуск (один раз)
 
 **Linux / macOS:**
+
 ```bash
 cd back
 cp .env.example .env      # создать конфиг из шаблона
@@ -16,6 +18,7 @@ yarn install              # или: npm install
 ```
 
 **Windows (PowerShell или CMD):**
+
 ```powershell
 cd back
 copy .env.example .env    :: создать конфиг из шаблона
@@ -28,9 +31,11 @@ npm install               :: или: yarn install
 ## Запуск сервера
 
 Одинаково на всех ОС:
+
 ```bash
 yarn start        # или: npm start
 ```
+
 Сервер поднимется на **http://localhost:3000**. Флаг `--watch` — авто-перезапуск при изменении кода.
 
 ## Проверка, что работает
@@ -38,9 +43,11 @@ yarn start        # или: npm start
 В браузере открыть http://localhost:3000/api/health — должно вернуть `{"ok":true}`.
 
 Или в терминале:
+
 ```bash
 curl http://localhost:3000/api/health
 ```
+
 ```powershell
 # Windows PowerShell:
 curl http://localhost:3000/api/health
@@ -48,14 +55,18 @@ curl http://localhost:3000/api/health
 Invoke-RestMethod http://localhost:3000/api/health
 ```
 
-если увидишь странные ответы — проверь 
+если увидишь странные ответы — проверь
+
 ```bash
 ss -ltnp | grep 3000
 ```
+
 , нет ли лишнего процесса.
 
 ## Для фронтендеров 🌱
+
 Вам нужно, чтобы бэк работал у себя, а фронт открывать отдельно.
+
 1. Запустить бэк по инструкции выше (`npm start`) — оставить это окно открытым.
 2. Базовый URL API в вашем коде: `http://localhost:3000/api`
 3. Проверить связь: открыть http://localhost:3000/api/health → `{"ok":true}`.
@@ -63,6 +74,7 @@ ss -ltnp | grep 3000
 Если порт 3000 занят — поменять `PORT` в `back/.env` и использовать новый в URL.
 
 ## Что где
+
 ```
 back/
 ├── src/
@@ -78,7 +90,7 @@ back/
 │       ├── favorites.js   # избранное (защищён)
 │       └── reminders.js   # напоминания (защищён)
 └── data/
-    ├── seed-plants.json   # стартовые карточки
+    ├── plants.json   # стартовые карточки
     └── plant_helper.db    # файл БД (в .gitignore)
 ```
 

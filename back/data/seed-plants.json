@@ -11,7 +11,7 @@
     "imageUrl": "https://images.unsplash.com/photo-1614594975525-e45190c55d0b"
   },
   {
-    "name": "Фикус Бенджамина",
+    "name": "Фикус",
     "watering": "Раз в 5–7 дней, не допускать пересыхания и застоя воды",
     "light": "Яркий рассеянный свет, боится сквозняков",
     "repotting": "Молодые — ежегодно, взрослые — раз в 2–3 года",
@@ -131,4 +131,5 @@
     "repotIntervalDays": 365,
     "imageUrl": "https://images.unsplash.com/photo-1611211232932-da3113c5b960"
   }
+
 ]
