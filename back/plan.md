@@ -47,11 +47,13 @@
 
 ---
 
-## Шаг 4 — Справочник (`src/routes/plants.js`) — публичный
-- [ ] `GET /api/plants` (+ `?q=` поиск `WHERE name LIKE`)
-- [ ] `GET /api/plants/:id` (404 если нет)
+## Шаг 4 — Справочник (`src/routes/plants.js`) — публичный ✅
+- [x] `GET /api/plants` (+ `?q=` поиск `WHERE name LIKE`, сортировка по name)
+- [x] `GET /api/plants/:id` (404 `{error}` если нет)
+- [x] хелпер `serialize.js` → `serializePlant` (snake_case → camelCase, переиспользуем)
+- [x] роутер смонтирован в server.js БЕЗ requireAuth (публичный)
 
-**Проверка:** `curl localhost:3000/api/plants` возвращает массив карточек.
+**Проверка:** ✅ список=12, `?q=Фикус` находит, /1 = Монстера camelCase, /999 = 404 `{error}`.
 
 ---
 

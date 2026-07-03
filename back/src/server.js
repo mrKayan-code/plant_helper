@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import './db.js'; // инициализация БД + схемы при старте
+import plantsRouter from './routes/plants.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,9 +15,8 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// --- роутеры (подключаются по мере готовности) ---
-// import plantsRouter from './routes/plants.js';
-// app.use('/api/plants', plantsRouter);
+// --- роутеры ---
+app.use('/api/plants', plantsRouter); // справочник (публичный)
 
 app.listen(PORT, () => {
   console.log(`Plant Helper API запущен: http://localhost:${PORT}`);
