@@ -1,8 +1,8 @@
 import { verifyToken } from '../auth.js';
 
-// Защита роутов: проверяет заголовок Authorization: Bearer <token>.
-// При успехе кладёт req.userId и пускает дальше. Иначе — 401.
-// По контракту 401 ВСЕГДА означает проблему с токеном → фронт чистит токен и на логин.
+
+
+
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');

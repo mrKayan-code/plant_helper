@@ -1,7 +1,7 @@
 import { db } from '../db.js';
 
-// JOIN collection + plants. Колонки растения — с префиксом p_,
-// чтобы не путались с одноимёнными полями collection (water_interval_days и т.п.).
+
+
 const SELECT = `
   SELECT
     c.id, c.user_id, c.plant_id, c.added_at, c.note,
@@ -21,7 +21,7 @@ const SELECT = `
   JOIN plants p ON p.id = c.plant_id
 `;
 
-// Поля, которые можно менять через PATCH: camelCase (API) → колонка БД.
+
 const PATCHABLE = {
   note: 'note',
   waterIntervalDays: 'water_interval_days',
@@ -31,27 +31,21 @@ const PATCHABLE = {
 };
 
 export const collectionRepo = {
-  /** Весь список пользователя (свежие сверху). */
+  
   findByUser(userId) {
     return db
       .prepare(`${SELECT} WHERE c.user_id = ? ORDER BY c.added_at DESC, c.id DESC`)
       .all(userId);
   },
 
-  /** Один элемент пользователя (или undefined). Проверяет владение. */
+  
   findOne(userId, id) {
     return db
       .prepare(`${SELECT} WHERE c.id = ? AND c.user_id = ?`)
       .get(id, userId);
   },
 
-  /**
-   * Добавить растение в список, вернуть готовый элемент (с карточкой).
-   * last_watered_at / last_repotted_at инициализируем сегодняшней датой —
-   * так у растения сразу появляется точка отсчёта, от которой считается
-   * расписание ухода (иначе напоминания невозможно вычислить). Пользователь
-   * может переопределить даты позже через отметки "полил"/"пересадил".
-   */
+  
   create(userId, { plantId, note, waterIntervalDays, repotIntervalDays }) {
     const info = db
       .prepare(`
@@ -64,10 +58,7 @@ export const collectionRepo = {
     return this.findOne(userId, info.lastInsertRowid);
   },
 
-  /**
-   * Частичное обновление. Принимает объект в camelCase, берёт только
-   * разрешённые поля. Возвращает обновлённый элемент или undefined (нет/чужой).
-   */
+  
   update(userId, id, fields) {
     const sets = [];
     const values = [];
@@ -81,12 +72,12 @@ export const collectionRepo = {
       const info = db
         .prepare(`UPDATE collection SET ${sets.join(', ')} WHERE id = ? AND user_id = ?`)
         .run(...values, id, userId);
-      if (info.changes === 0) return undefined; // не найдено / чужое
+      if (info.changes === 0) return undefined; 
     }
     return this.findOne(userId, id);
   },
 
-  /** Удалить свой элемент. Возвращает true, если что-то удалилось. */
+  
   remove(userId, id) {
     const info = db
       .prepare('DELETE FROM collection WHERE id = ? AND user_id = ?')
@@ -94,7 +85,7 @@ export const collectionRepo = {
     return info.changes > 0;
   },
 
-  /** Отметить действие (полив/пересадку) сегодняшней датой. */
+  
   markDone(userId, id, action) {
     const column = action === 'water' ? 'last_watered_at' : 'last_repotted_at';
     const info = db

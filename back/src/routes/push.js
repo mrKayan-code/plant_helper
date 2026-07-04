@@ -5,14 +5,14 @@ import { requireAuth } from '../middleware/requireAuth.js';
 
 const router = Router();
 
-// Публичный VAPID-ключ — нужен фронту для подписки. Токен не требуется.
+
 router.get('/vapid-public-key', (req, res) => {
   const publicKey = process.env.VAPID_PUBLIC;
   if (!publicKey) return res.status(503).json({ error: 'Push не настроен на сервере' });
   res.json({ publicKey });
 });
 
-// Сохранить подписку текущего пользователя.
+
 router.post('/subscribe', requireAuth, (req, res) => {
   const sub = req.body;
   if (!sub || !sub.endpoint) {
@@ -21,7 +21,7 @@ router.post('/subscribe', requireAuth, (req, res) => {
   pushRepo.save(req.userId, sub);
   res.status(201).json({ ok: true });
 
-  // Приветственный пуш — мгновенное подтверждение, что всё работает.
+  
   sendToUser(req.userId, {
     title: 'Уведомления включены 🔔',
     body: 'Теперь напомним, когда растениям понадобится уход 🌱',
@@ -29,7 +29,7 @@ router.post('/subscribe', requireAuth, (req, res) => {
   });
 });
 
-// Тестовый пуш себе — удобно проверить, что всё работает (демо).
+
 router.post('/test', requireAuth, async (req, res) => {
   await sendToUser(req.userId, {
     title: 'Plant Helper 🌱',

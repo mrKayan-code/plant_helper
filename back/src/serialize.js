@@ -1,13 +1,13 @@
-// Преобразование строк из БД (snake_case) в формат API (camelCase).
-// Держим маппинг в одном месте, чтобы контракт не разъезжался.
 
-/** Пользователь: наружу отдаём только безопасные поля (без password_hash). */
+
+
+
 export function serializeUser(row) {
   if (!row) return null;
   return { id: row.id, email: row.email };
 }
 
-/** Карточка справочника: строка таблицы plants → объект API. */
+
 export function serializePlant(row) {
   if (!row) return null;
   return {
@@ -25,11 +25,7 @@ export function serializePlant(row) {
   };
 }
 
-/**
- * Элемент личного списка: JOIN-строка collection + plants → объект API.
- * Пользовательские поля — снаружи, карточка справочника — вложена в `plant`.
- * Колонки растения приходят с префиксом p_ (см. collection.repo.js).
- */
+
 export function serializeCollectionItem(row) {
   if (!row) return null;
   return {

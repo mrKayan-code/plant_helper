@@ -4,13 +4,13 @@ import { serializePlant } from '../serialize.js';
 
 const router = Router();
 
-// GET /api/plants  (+ ?q=строка — поиск по названию). Публичный.
+
 router.get('/', (req, res) => {
   const rows = plantsRepo.findAll(req.query.q);
   res.json(rows.map(serializePlant));
 });
 
-// GET /api/plants/:id — одна карточка
+
 router.get('/:id', (req, res) => {
   const row = plantsRepo.findById(req.params.id);
   if (!row) {

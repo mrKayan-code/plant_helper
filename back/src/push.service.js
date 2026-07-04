@@ -4,7 +4,7 @@ import { computeReminders, todayISO } from './reminders.service.js';
 
 let enabled = false;
 
-// Настроить web-push из VAPID-ключей. Без ключей пуши просто выключены.
+
 export function initPush() {
   const publicKey = process.env.VAPID_PUBLIC;
   const privateKey = process.env.VAPID_PRIVATE;
@@ -17,7 +17,7 @@ export function initPush() {
   return true;
 }
 
-// Текст уведомления из напоминания.
+
 function buildPayload(r) {
   const isWater = r.action === 'water';
   return {
@@ -27,7 +27,7 @@ function buildPayload(r) {
   };
 }
 
-// Отправить payload на все подписки пользователя. Протухшие — удаляем.
+
 export async function sendToUser(userId, payload) {
   if (!enabled) return;
   const subs = pushRepo.byUser(userId);
@@ -36,7 +36,7 @@ export async function sendToUser(userId, payload) {
       await webpush.sendNotification(sub, JSON.stringify(payload));
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 410) {
-        pushRepo.deleteByEndpoint(sub.endpoint); // подписка мертва
+        pushRepo.deleteByEndpoint(sub.endpoint); 
       } else {
         console.error('push error:', err.statusCode || err.message);
       }
@@ -44,14 +44,14 @@ export async function sendToUser(userId, payload) {
   }
 }
 
-// Один проход планировщика: у кого подошёл срок (due <= сегодня) и ещё не слали — шлём.
+
 async function tick() {
   const today = todayISO();
   for (const userId of pushRepo.subscribedUserIds()) {
     const due = computeReminders(userId).filter((r) => r.dueDate <= today);
     for (const r of due) {
-      // Дедуп «раз в день»: ключ по СЕГОДНЯШНЕЙ дате, а не по сроку.
-      // Пока задача висит просроченной — напомним раз в новый день, а не замолчим навсегда.
+      
+      
       const key = `${r.collectionId}:${r.action}:${today}`;
       if (pushRepo.wasSent(userId, key)) continue;
       await sendToUser(userId, buildPayload(r));

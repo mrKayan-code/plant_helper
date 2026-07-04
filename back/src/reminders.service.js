@@ -1,7 +1,7 @@
 import { collectionRepo } from './repositories/collection.repo.js';
 import { serializeCollectionItem } from './serialize.js';
 
-// Дата YYYY-MM-DD (строки такого вида сравниваются лексикографически = хронологически)
+
 export function addDays(dateStr, days) {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + days);
@@ -12,7 +12,7 @@ export function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Следующая дата ухода для действия (или null, если посчитать нельзя).
+
 function buildReminder(item, action, lastDate, interval) {
   if (lastDate == null || lastDate === '' || interval == null) return null;
   return {
@@ -24,8 +24,8 @@ function buildReminder(item, action, lastDate, interval) {
   };
 }
 
-// Полное расписание ухода пользователя (полив + пересадка по каждому растению).
-// Один источник правды: используют и GET /api/reminders, и планировщик пушей.
+
+
 export function computeReminders(userId) {
   const items = collectionRepo.findByUser(userId).map(serializeCollectionItem);
   const reminders = [];

@@ -2,16 +2,16 @@ import { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 
-// Файл БД: по умолчанию back/data/plant_helper.db, можно переопределить DB_PATH
-// (удобно для изолированных тестов, чтобы не трогать рабочую базу).
+
+
 const DB_PATH = process.env.DB_PATH || join(import.meta.dirname, '..', 'data', 'plant_helper.db');
 
 export const db = new DatabaseSync(DB_PATH);
 
-// Включаем контроль внешних ключей (по умолчанию в SQLite выключен)
+
 db.exec('PRAGMA foreign_keys = ON;');
 
-// --- Схема (см. общий контракт в ../plan.md) ---
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,17 +81,17 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_push_subs_user  ON push_subscriptions(user_id);
 `);
 
-// --- Seed/sync справочника: upsert по slug при каждом старте ---
-// Идентичность растения — slug (не автоинкремент id), поэтому пересев НЕ ломает
-// ссылки collection.plant_id (id существующей строки сохраняется при обновлении).
-// Так 3-й тим может регенерировать plants.json сколько угодно — данные обновятся
-// без сноса БД и без потери коллекций пользователей.
+
+
+
+
+
 const ASSET_BASE_URL = process.env.ASSET_BASE_URL || 'http://localhost:3000';
 
-// Относительный путь картинки → абсолютный URL на бэк (который раздаёт /assets).
+
 function toImageUrl(raw) {
   if (!raw) return null;
-  if (/^https?:\/\//.test(raw)) return raw;              // уже абсолютный — не трогаем
+  if (/^https?:\/\//.test(raw)) return raw;
   return `${ASSET_BASE_URL}/${raw.replace(/^\//, '')}`;
 }
 

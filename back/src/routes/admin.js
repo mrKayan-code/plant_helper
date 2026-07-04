@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 
-// ⚠️ DEV-ONLY инструмент для отладки. Даёт полный доступ к БД без авторизации.
-// Включается только при ADMIN_ENABLED=true. НЕ выкатывать в прод.
+
+
 const router = Router();
 
-// Белый список таблиц — имена таблиц нельзя параметризовать, поэтому строго проверяем.
+
 const TABLES = ['users', 'plants', 'collection', 'favorites', 'push_subscriptions', 'push_log'];
 
 function columnsOf(table) {
@@ -19,7 +19,7 @@ function ensureTable(req, res, next) {
   next();
 }
 
-// Список таблиц + количество строк
+
 router.get('/tables', (req, res) => {
   const out = TABLES.map((name) => ({
     name,
@@ -28,16 +28,16 @@ router.get('/tables', (req, res) => {
   res.json(out);
 });
 
-// Колонки + все строки таблицы
+
 router.get('/table/:name', ensureTable, (req, res) => {
   const { name } = req.params;
   const columns = columnsOf(name);
   const rows = db.prepare(`SELECT * FROM ${name}`).all();
-  const hasId = columns.includes('id'); // favorites без id (составной ключ) — только просмотр
+  const hasId = columns.includes('id'); 
   const payload = { table: name, columns, rows, editable: hasId };
 
-  // Для collection добавляем дефолты из справочника (эффективный интервал, когда графа пустая).
-  // hints: { <rowId>: { water_interval_days, repot_interval_days } }
+  
+  
   if (name === 'collection') {
     const defs = db.prepare(`
       SELECT c.id AS id,
@@ -57,7 +57,7 @@ router.get('/table/:name', ensureTable, (req, res) => {
   res.json(payload);
 });
 
-// Обновить строку по id (для collection/plants/users). Меняем только реальные колонки.
+
 router.patch('/table/:name/:id', ensureTable, (req, res) => {
   const { name, id } = req.params;
   const columns = columnsOf(name);
@@ -79,7 +79,7 @@ router.patch('/table/:name/:id', ensureTable, (req, res) => {
   res.json(db.prepare(`SELECT * FROM ${name} WHERE id = ?`).get(id));
 });
 
-// Удалить строку по id
+
 router.delete('/table/:name/:id', ensureTable, (req, res) => {
   const { name, id } = req.params;
   if (!columnsOf(name).includes('id')) {
