@@ -20,6 +20,10 @@ export class Plant {
   get isToxic() {
     if (!this.toxicity) return false;
     const t = this.toxicity.toLowerCase();
+ 
+    const explicitlySafe = /безопасн|не\s+токсич|не\s+ядовит/.test(t);
+    if (explicitlySafe) return false;
+ 
     return t.includes("ядовит") || t.includes("токсич");
   }
 }
